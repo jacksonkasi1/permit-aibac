@@ -123,39 +123,28 @@ export const PromptChat = forwardRef<
   const isInputDisabled = status !== "ready" || isReadonly;
 
   return (
-    <div className={`flex min-w-0 flex-col bg-background ${isHomePage ? "h-auto" : "h-[calc(100dvh-40px)]"}`}>
+    <div className="flex flex-col w-full h-full">
+      {/* Chat Header for non-home pages */}
       {!isHomePage && <ChatHeader chatId={id} />}
+      
+      {/* Chat Messages Area */}
+      <div className="flex-1 w-full overflow-y-auto">
+        {messages.map((message) => (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            isLoading={status === "submitted" && message.id === messages[messages.length - 1]?.id}
+          />
+        ))}
+        
+        {status === "submitted" &&
+          messages.length > 0 &&
+          messages[messages.length - 1]?.role === "user" && <ThinkingMessage />}
+      </div>
 
-      {!isHomePage && (
-        <div className="relative flex-1">
-          <ChatContainer 
-            className="flex-1 space-y-4 p-4" 
-            ref={containerRef}
-          >
-            {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                isLoading={status === "submitted" && message.id === messages[messages.length - 1]?.id}
-              />
-            ))}
-            
-            {status === "submitted" &&
-              messages.length > 0 &&
-              messages[messages.length - 1]?.role === "user" && <ThinkingMessage />}
-          </ChatContainer>
-          
-          <div className="absolute bottom-4 right-4">
-            <ScrollButton 
-              scrollRef={containerRef} 
-              containerRef={containerRef} 
-            />
-          </div>
-        </div>
-      )}
-
+      {/* Chat Input Area */}
       {!isReadonly && (
-        <div className="mx-auto w-full max-w-3xl px-4 pb-4 md:pb-6">
+        <div className="mx-auto w-full max-w-3xl px-4 pt-2">
           <FileUpload
             onFilesAdded={handleFileAdded}
             multiple={true}
@@ -186,7 +175,7 @@ export const PromptChat = forwardRef<
                 
                 <PromptInputTextarea 
                   placeholder="Send a message..." 
-                  className="min-h-[80px]"
+                  className="min-h-[60px]"
                   disabled={isInputDisabled}
                 />
                 
