@@ -44,7 +44,7 @@ const routes = app
 export type AppType = typeof routes;
 
 export default {
-  port: 3004,
+  port: process.env.PORT ? parseInt(process.env.PORT) : 3004,
   fetch: app.fetch,
   idleTimeout: 30,
 };
