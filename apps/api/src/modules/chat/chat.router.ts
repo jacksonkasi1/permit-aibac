@@ -32,7 +32,7 @@ const sendChatSchema = z.object({
 });
 
 const historyChatSchema = z.object({
-  limit: z.number().optional().default(10),
+  limit: z.coerce.number().optional().default(10),
 });
 
 /**
@@ -61,21 +61,32 @@ const chatRoutes = new Hono()
       c.header("Content-Type", "text/plain; charset=utf-8");
 
       // Return streamed response
-      return stream(c, (stream) =>
-        stream.pipe(
-          result.toDataStream({
-            sendReasoning: true,
-            getErrorMessage(error) {
-              logger.error(`Stream error for user ${userId}:`, error);
-              return "An error occurred while processing your request";
-            },
-          }),
-        ),
-      );
+      return stream(c, async (stream) => {
+        try {
+          // Pipe the AI SDK response to the HTTP stream
+          await stream.pipe(
+            result.toDataStream({
+              sendReasoning: true,
+              getErrorMessage(error) {
+                logger.error(`Stream error for user ${userId}:`, error);
+                return "An error occurred while processing your request";
+              },
+            }),
+          );
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Streaming error for user ${userId}:`, error);
+          await stream.write(`Error: Failed to process your request - ${errorMessage}`);
+        }
+      });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Chat route error:", error);
-      return c.json({ error: "Failed to process chat request" }, 500);
+      return c.json({ error: "Failed to process chat request", details: errorMessage }, 500);
     }
+  })
+  .get("/", async (c) => {
+    return c.json({ message: "Chat route is working" });
   })
   // Get chat history for the authenticated user
   .get("/history", zValidator("query", historyChatSchema), async (c) => {
@@ -89,8 +100,9 @@ const chatRoutes = new Hono()
 
       return c.json({ history });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.error("Get chat history error:", error);
-      return c.json({ error: "Failed to get chat history" }, 500);
+      return c.json({ error: "Failed to get chat history", details: errorMessage }, 500);
     }
   });
 
