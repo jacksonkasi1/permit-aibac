@@ -19,6 +19,10 @@ export async function searchContent(params: SearchParams): Promise<SearchRespons
     }
   }
 
+  if (!params.bucketId) {
+    throw new Error("BucketId is required for search");
+  }
+
   try {
     logger.info(
       {
@@ -39,15 +43,18 @@ export async function searchContent(params: SearchParams): Promise<SearchRespons
       verbosity: params.includeMetadata ? 2 : 1,
     };
 
-    // The SDK handles bucketIds through a separate parameter
-    const response = await client.search.content(
-      searchRequest,
-      params.bucketId ? [params.bucketId] : undefined,
-    );
+    // First parameter is the bucketId, second is the search request
+    const response = await client.search.content(params.bucketId, searchRequest);
 
     // Convert response to our internal format
     const results = {
-      results: response.results || [],
+      results: (response.search?.results || []).map(item => ({
+        id: item.chunkId || "",
+        content: item.text || "",
+        score: item.score || 0,
+        documentId: item.documentId || "",
+        metadata: item.searchData || {},
+      })),
       query: params.query,
       timestamp: new Date().toISOString(),
     };
@@ -110,7 +117,11 @@ export async function searchDocuments(params: SearchParams): Promise<SearchRespo
     let documentIds: string[] = [];
     if (params.bucketId) {
       const bucketDocuments = await client.documents.lookup(params.bucketId);
-      documentIds = (bucketDocuments?.documents || []).map(doc => doc.id);
+      // Map using appropriate property for document IDs
+      documentIds = (bucketDocuments.documents || []).map((doc) => {
+        // Access the documentId property
+        return doc.documentId || "";
+      });
     }
 
     if (documentIds.length === 0) {
@@ -134,7 +145,13 @@ export async function searchDocuments(params: SearchParams): Promise<SearchRespo
 
     // Convert response to our internal format
     const results = {
-      results: response.results || [],
+      results: (response.search?.results || []).map(item => ({
+        id: item.chunkId || "",
+        content: item.text || "",
+        score: item.score || 0,
+        documentId: item.documentId || "",
+        metadata: item.searchData || {},
+      })),
       query: params.query,
       timestamp: new Date().toISOString(),
     };
