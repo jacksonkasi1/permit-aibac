@@ -1,5 +1,5 @@
 /**
- * Chat router implementation using Vercel AI SDK
+ * Chat router implementation using Vercel AI SDK and Permit.io for security
  */
 import { auth, getUserId, requireAuth } from "@/pkg/middleware/clerk-auth";
 import { zValidator } from "@/pkg/util/validator-wrapper";
@@ -9,6 +9,104 @@ import { Hono } from "hono";
 import { stream } from "hono/streaming";
 import { z } from "zod";
 import { chatService } from "./chat.service";
+import { logAccessAttempt } from "@repo/permit";
+import { HTTPException } from "hono/http-exception";
+import { promptService } from "./services";
+
+// Define interface for context variables
+declare module "hono" {
+  interface ContextVariableMap {
+    permitContext: {
+      userId: string;
+      filters?: Record<string, any>;
+      classification?: string;
+    };
+  }
+}
+
+/**
+ * Middleware that checks if user has permissions to use chat functionality
+ */
+function permitChatMiddleware() {
+  return async (c: any, next: () => Promise<void>) => {
+    try {
+      const userId = getUserId(c);
+      logger.debug(`Checking chat access for user ${userId}`);
+      
+      // Log access attempt
+      await logAccessAttempt(userId, "access", "chat", true);
+      
+      // Create custom context property for permission filters
+      c.set("permitContext", { userId, filters: {} });
+      
+      await next();
+    } catch (error) {
+      logger.error(`Chat access error:`, error);
+      return c.json({ 
+        error: "Authorization error",
+        message: error instanceof Error ? error.message : "Access denied"
+      }, 401);
+    }
+  };
+}
+
+/**
+ * Middleware to classify and filter prompts based on intent and user permissions
+ */
+async function promptClassifierMiddleware(c: any, next: () => Promise<void>) {
+  try {
+    // Get user ID from auth context
+    const userId = getUserId(c);
+    
+    // Parse the request body
+    const body = await c.req.json();
+    const { messages } = body;
+    
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      throw new HTTPException(400, { message: "Invalid or empty messages" });
+    }
+    
+    // Classify the prompt using our service
+    const classificationResult = await promptService.classifyPrompt(userId, messages);
+    
+    if (!classificationResult.allowed) {
+      logger.warn(`Prompt rejected for user ${userId}: ${classificationResult.reason}`);
+      return c.json({ 
+        error: "Prompt rejected", 
+        message: classificationResult.reason || "Your request cannot be processed"
+      }, 403);
+    }
+    
+    // Attach classification data to context for downstream usage
+    const permitContext = c.get("permitContext") || { userId };
+    c.set("permitContext", {
+      ...permitContext,
+      classification: classificationResult.classification,
+      filters: classificationResult.filters || {}
+    });
+    
+    // Log successful classification
+    logger.info(`Prompt classified as '${classificationResult.classification}' for user ${userId}`);
+    
+    // Reconstruct the request for downstream middleware
+    c.req.raw = new Request(c.req.raw.url, {
+      method: c.req.raw.method,
+      headers: c.req.raw.headers,
+      body: JSON.stringify(body)
+    });
+    
+    await next();
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
+    }
+    logger.error("Prompt classification error:", error);
+    return c.json({ 
+      error: "Failed to process request", 
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, 500);
+  }
+}
 
 // Validation schemas
 const sendChatSchema = z.object({
@@ -36,16 +134,23 @@ const historyChatSchema = z.object({
 });
 
 /**
- * Chat routes with authentication middleware
+ * Chat routes with authentication and prompt classification
  */
 const chatRoutes = new Hono()
+  // Apply authentication middleware to all routes
   .use("*", auth(), requireAuth)
+  // Apply permission check middleware
+  .use("*", permitChatMiddleware())
+  
   // Send a chat message and get a streaming response
-  .post("/", zValidator("json", sendChatSchema), async (c) => {
+  .post("/", promptClassifierMiddleware, zValidator("json", sendChatSchema), async (c) => {
     try {
       // Parse request body
       const { messages, attachments } = c.req.valid("json");
       const userId = getUserId(c);
+      
+      // Get permission context from middleware
+      const permitContext = c.get("permitContext");
 
       logger.info(`Chat request from user ${userId} with ${messages.length} messages`);
 
@@ -54,6 +159,8 @@ const chatRoutes = new Hono()
         messages: messages as Message[],
         userId,
         attachments,
+        permissionFilters: permitContext.filters,
+        promptClassification: permitContext.classification
       });
 
       // Set appropriate headers for streaming
@@ -68,7 +175,6 @@ const chatRoutes = new Hono()
             result.toDataStream({
               sendReasoning: true,
               getErrorMessage(error) {
-                console.log("Stream error", error);
                 logger.error(`Stream error for user ${userId}:`, error);
                 return "An error occurred while processing your request";
               },
@@ -86,9 +192,12 @@ const chatRoutes = new Hono()
       return c.json({ error: "Failed to process chat request", details: errorMessage }, 500);
     }
   })
+  
+  // Health check endpoint
   .get("/", async (c) => {
     return c.json({ message: "Chat route is working" });
   })
+
   // Get chat history for the authenticated user
   .get("/history", zValidator("query", historyChatSchema), async (c) => {
     try {
