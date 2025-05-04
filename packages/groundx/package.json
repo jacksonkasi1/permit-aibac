@@ -1,0 +1,27 @@
+{
+    "name": "@repo/groundx",
+    "version": "1.0.0",
+    "description": "EyeLevel GroundX RAG integration utilities",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "keywords": [
+        "rag",
+        "groundx",
+        "eyelevel"
+    ],
+    "scripts": {
+        "test": "vitest run -c ./vitest.config.ts",
+        "format": "biome format --write .",
+        "setup": "bun src/setup.ts"
+    },
+    "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@types/node": "^22.15.3",
+        "typescript": "^5.8.3"
+    },
+    "dependencies": {
+        "@repo/logs": "workspace:*",
+        "axios": "^1.6.2",
+        "zod": "^3.22.4"
+    }
+}
