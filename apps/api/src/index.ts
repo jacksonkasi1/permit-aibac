@@ -1,8 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import { postRoutes } from "@/modules/posts";
-
 import { chatRoutes } from "@/modules/chat/chat.router";
 import { webhookRoutes } from "@/modules/webhooks/webhook.routes";
 import { errorHandler } from "@/pkg/middleware/error";
@@ -41,7 +39,6 @@ app.onError(errorHandler);
 const routes = app
   .basePath("/api")
   .route("/webhooks", webhookRoutes)
-  .route("/posts", postRoutes)
   .route("/chat", chatRoutes);
 
 export type AppType = typeof routes;
