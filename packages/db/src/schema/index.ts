@@ -26,4 +26,4 @@ export * from "./tbl-notifications";
 export * from "./tbl-treating-physician-relationships";
 
 // All relations
-export * from './relations';
+export * from "./relations";

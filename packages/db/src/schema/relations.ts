@@ -3,23 +3,23 @@ import { relations } from "drizzle-orm";
 
 // Import all tables
 import {
-  tbl_users,
-  tbl_medical_records,
-  tbl_diagnoses,
-  tbl_prescriptions,
-  tbl_appointments,
-  tbl_insurance,
-  tbl_chats,
-  tbl_rag_queries,
-  tbl_ai_responses,
-  tbl_audit_logs,
-  tbl_notifications,
-  tbl_treating_physician_relationships,
-  tbl_roles,
-  tbl_resources,
   tbl_actions,
+  tbl_ai_responses,
+  tbl_appointments,
+  tbl_audit_logs,
+  tbl_chats,
+  tbl_diagnoses,
+  tbl_insurance,
+  tbl_medical_records,
+  tbl_notifications,
   tbl_permissions,
+  tbl_prescriptions,
+  tbl_rag_queries,
+  tbl_resources,
+  tbl_roles,
+  tbl_treating_physician_relationships,
   tbl_user_roles,
+  tbl_users,
 } from "./index";
 
 /**
@@ -220,18 +220,21 @@ export const tbl_notifications_relations = relations(tbl_notifications, ({ one }
 /**
  * Relations for treating physician relationships table
  */
-export const tbl_treating_physician_relationships_relations = relations(tbl_treating_physician_relationships, ({ one }) => ({
-  doctor: one(tbl_users, {
-    fields: [tbl_treating_physician_relationships.doctor_id],
-    references: [tbl_users.id],
-    relationName: "doctor_patients",
+export const tbl_treating_physician_relationships_relations = relations(
+  tbl_treating_physician_relationships,
+  ({ one }) => ({
+    doctor: one(tbl_users, {
+      fields: [tbl_treating_physician_relationships.doctor_id],
+      references: [tbl_users.id],
+      relationName: "doctor_patients",
+    }),
+    patient: one(tbl_users, {
+      fields: [tbl_treating_physician_relationships.patient_id],
+      references: [tbl_users.id],
+      relationName: "patient_doctors",
+    }),
   }),
-  patient: one(tbl_users, {
-    fields: [tbl_treating_physician_relationships.patient_id],
-    references: [tbl_users.id],
-    relationName: "patient_doctors",
-  }),
-}));
+);
 
 /**
  * Relations for roles table
@@ -306,4 +309,4 @@ export const tbl_user_roles_relations = relations(tbl_user_roles, ({ one }) => (
     references: [tbl_resources.id],
     relationName: "resource_users",
   }),
-})); 
+}));
