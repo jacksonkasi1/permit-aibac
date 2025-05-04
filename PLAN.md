@@ -101,7 +101,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 
 ## 5. Implementation Phases
 
-### Phase 1: Environment Setup and Core Components (Weeks 1-2)
+### Phase 1: Environment Setup and Core Components
 - [ ] Set up Next.js development environment
 - [ ] Configure Langflow instance
 - [ ] Create EyeLevel GroundX account and obtain API key
@@ -112,7 +112,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Set up authentication system (Auth0/NextAuth.js)
 - [ ] Configure Vercel project for deployment
 
-### Phase 2: Authorization Framework (Weeks 3-4)
+### Phase 2: Authorization Framework
 - [ ] Implement Permit.io SDK integration
 - [ ] Define ABAC policy model for medical data
 - [ ] Create role definitions for Doctor and Patient
@@ -121,7 +121,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Test permission enforcement
 - [ ] Deploy authorization layer to Vercel
 
-### Phase 3: GroundX RAG and LangChain.js Implementation (Weeks 5-6)
+### Phase 3: GroundX RAG and LangChain.js Implementation
 - [ ] Upload medical documents to GroundX via API
 - [ ] Build document ingest pipeline for medical data
 - [ ] Implement GroundX-powered search with LangChain.js
@@ -130,7 +130,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Create secure retrieval patterns
 - [ ] Configure Vercel serverless functions for RAG
 
-### Phase 4: Langflow Orchestration (Weeks 7-8)
+### Phase 4: Langflow Orchestration
 - [ ] Design custom Langflow components for Permit.io
 - [ ] Create flow templates for different medical scenarios
 - [ ] Implement security-focused flow patterns
@@ -138,7 +138,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Test end-to-end workflows
 - [ ] Configure Vercel Edge functions for optimal performance
 
-### Phase 5: Security Hardening and Testing (Weeks 9-10)
+### Phase 5: Security Hardening and Testing
 - [ ] Implement comprehensive security testing suite
 - [ ] Conduct red team exercises
 - [ ] Test prompt injection defenses

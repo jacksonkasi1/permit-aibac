@@ -91,20 +91,25 @@ To deploy to Vercel:
 
 ```
 permit-aibac/
-├── src/                    # Source code
-│   ├── api/                # API routes
-│   │   ├── chat/          # Chat API endpoints
-│   │   └── workflow/      # Upstash Workflow endpoints
-│   ├── components/         # React components
-│   ├── lib/                # Shared utilities
-│   │   ├── langchain/     # LangChain.js configurations
-│   │   ├── permit/        # Permit.io integrations
-│   │   ├── groundx/       # EyeLevel GroundX RAG integrations
-│   │   └── upstash/       # QStash workflow configurations
-│   ├── pages/             # Next.js pages
-│   └── types/             # TypeScript type definitions
-├── public/                # Static assets
-└── docs/                  # Documentation
+├── apps/
+│   ├── api/         # Bun API backend (Hono, Drizzle, Clerk)
+│   └── web/         # Next.js 15 frontend (App Router, shadcn/ui, React Query)
+├── packages/        # Shared packages (code, integrations, utilities)
+│   ├── db/          # Drizzle schema, types, and db utilities
+│   ├── id/          # Identity utilities
+│   ├── logs/        # Logging utilities
+│   ├── typescript-config/ # Shared tsconfig
+│   ├── langchain/   # LangChain.js configurations
+│   ├── permit/      # Permit.io integrations
+│   ├── groundx/     # EyeLevel GroundX RAG integrations
+│   └── upstash/     # QStash workflow configurations
+├── .vscode/         # VSCode settings
+├── .turbo/          # Turbo repo build cache
+├── public/          # Static assets (if any)
+├── docs/            # Documentation
+├── README.md        # Project overview
+├── PLAN.md          # Detailed architecture and implementation plan
+└── ...              # Other config and root files
 ```
 
 ## Documentation
