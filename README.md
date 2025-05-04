@@ -25,7 +25,7 @@ The system enforces different access levels for doctors and patients, ensuring s
 
 ### Prerequisites
 
-- Node.js 18+ and npm/yarn
+- Node.js 18+ and pnpm/bun
 - Permit.io account 
 - EyeLevel GroundX API key
 - Upstash account (for QStash)
@@ -42,9 +42,7 @@ cd permit-aibac
 
 2. Install dependencies
 ```bash
-npm install
-# or
-yarn install
+pnpm install
 ```
 
 3. Set up environment variables
@@ -55,9 +53,7 @@ cp .env.example .env.local
 
 4. Start the development server
 ```bash
-npm run dev
-# or
-yarn dev
+bun run dev
 ```
 
 5. Access the application
