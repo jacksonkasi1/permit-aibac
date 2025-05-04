@@ -2,8 +2,8 @@
   "name": "api",
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
-    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts --env-file=.env",
+    "start": "bun run src/index.ts --env-file=.env",
     "lint": "biome check ./src",
     "format": "biome format --write .",
     "clerk:listen": "pnpm dlx ngrok http --url=still-regular-sculpin.ngrok-free.app 3004"

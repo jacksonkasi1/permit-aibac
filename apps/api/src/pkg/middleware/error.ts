@@ -4,6 +4,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 export const errorHandler = (err: Error | HTTPException, c: Context) => {
+  console.error(err);
   if (err instanceof HTTPException) {
     logger.error({
       status: err.status,
