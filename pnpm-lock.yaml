@@ -39,6 +39,9 @@ importers:
       '@hono/zod-validator':
         specifier: ^0.4.3
         version: 0.4.3(hono@4.7.8)(zod@3.24.3)
+      '@repo/clerk':
+        specifier: workspace:*
+        version: link:../../packages/clerk
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -48,6 +51,9 @@ importers:
       '@repo/logs':
         specifier: workspace:*
         version: link:../../packages/logs
+      '@repo/permit':
+        specifier: workspace:*
+        version: link:../../packages/permit
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
