@@ -8,6 +8,8 @@ import { newIdWithoutPrefix } from "@repo/id";
 import { useLocalStorage } from "usehooks-ts";
 import { ChatContainer } from "@/components/ui/chat-container";
 import { ScrollButton } from "@/components/ui/scroll-button";
+import { Button } from "@/components/ui/button";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 const SAMPLE_PROMPTS = [
   "Tell me about your AI services",
@@ -21,6 +23,7 @@ export default function ChatPage() {
   const router = useRouter();
   const [, setLocalStorageInput] = useLocalStorage("input", "");
   const [inputValue, setInputValue] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const chatId = `home-${Date.now()}`;
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -34,6 +37,10 @@ export default function ChatPage() {
       chatRef.current.setInput?.(inputValue);
     }
   }, [inputValue]);
+  
+  const toggleSuggestions = () => {
+    setShowSuggestions(!showSuggestions);
+  };
   
   return (
     <div className="flex h-[calc(100dvh-49px)] w-full flex-col">
@@ -68,18 +75,40 @@ export default function ChatPage() {
           </div>
         </div>
         
-        {/* Fixed prompt suggestions area at bottom */}
-        <div className="border-t p-4">
+        {/* Toggle button and suggestions */}
+        <div className="border-t">
           <div className="mx-auto w-full max-w-3xl">
-            <div className="flex flex-wrap justify-center gap-2">
-              {SAMPLE_PROMPTS.map((prompt) => (
-                <PromptSuggestion 
-                  key={prompt} 
-                  onClick={(text) => setInputValue(text)}
-                >
-                  {prompt}
-                </PromptSuggestion>
-              ))}
+            <div className="flex justify-center py-2 border-b">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={toggleSuggestions}
+                className="text-sm text-muted-foreground flex items-center gap-1"
+              >
+                {showSuggestions ? "Hide suggestions" : "Show suggestions"} 
+                {showSuggestions ? (
+                  <ChevronUp className="h-4 w-4 transition-transform duration-200" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                )}
+              </Button>
+            </div>
+            
+            <div 
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                showSuggestions ? "max-h-[200px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="flex flex-wrap justify-center gap-2 p-4">
+                {SAMPLE_PROMPTS.map((prompt) => (
+                  <PromptSuggestion 
+                    key={prompt} 
+                    onClick={(text) => setInputValue(text)}
+                  >
+                    {prompt}
+                  </PromptSuggestion>
+                ))}
+              </div>
             </div>
           </div>
         </div>

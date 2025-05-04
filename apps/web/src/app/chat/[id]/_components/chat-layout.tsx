@@ -5,6 +5,8 @@ import { PromptChat } from "@/components/chat/prompt-chat";
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { ChatContainer } from "@/components/ui/chat-container";
 import { ScrollButton } from "@/components/ui/scroll-button";
+import { Button } from "@/components/ui/button";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 const FOLLOW_UP_PROMPTS = [
   "Tell me more about that",
@@ -20,6 +22,7 @@ interface ChatLayoutProps {
 
 export function ChatLayout({ id }: ChatLayoutProps) {
   const [inputValue, setInputValue] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const chatRef = useRef<{
     setInput: (value: string) => void;
   }>(null);
@@ -31,6 +34,10 @@ export function ChatLayout({ id }: ChatLayoutProps) {
     if (chatRef.current) {
       chatRef.current.setInput(text);
     }
+  };
+
+  const toggleSuggestions = () => {
+    setShowSuggestions(!showSuggestions);
   };
 
   return (
@@ -61,20 +68,41 @@ export function ChatLayout({ id }: ChatLayoutProps) {
         </div>
       </div>
 
-      {/* Fixed prompt suggestions and input at bottom */}
-      <div className="border-t p-4">
+      {/* Toggle button and suggestions */}
+      <div className="border-t">
         <div className="mx-auto w-full max-w-3xl">
-          <div className="mb-4 flex flex-wrap justify-center gap-2">
-            {FOLLOW_UP_PROMPTS.map((prompt) => (
-              <PromptSuggestion 
-                key={prompt} 
-                onClick={(text) => handlePromptClick(text)}
-                variant="outline"
-                size="sm"
-              >
-                {prompt}
-              </PromptSuggestion>
-            ))}
+          <div className="flex justify-center py-2 border-b">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleSuggestions}
+              className="text-sm text-muted-foreground flex items-center gap-1"
+            >
+              {showSuggestions ? "Hide suggestions" : "Show suggestions"} 
+              {showSuggestions ? (
+                <ChevronUp className="h-4 w-4 transition-transform duration-200" />
+              ) : (
+                <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+              )}
+            </Button>
+          </div>
+          
+          <div 
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+              showSuggestions ? "max-h-[200px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="flex flex-wrap justify-center gap-2 p-4">
+              {FOLLOW_UP_PROMPTS.map((prompt) => (
+                <PromptSuggestion 
+                  key={prompt} 
+                  onClick={(text) => handlePromptClick(text)}
+                  variant="outline"
+                >
+                  {prompt}
+                </PromptSuggestion>
+              ))}
+            </div>
           </div>
         </div>
       </div>
