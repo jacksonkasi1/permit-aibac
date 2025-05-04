@@ -282,11 +282,12 @@ async function createResourceRelations() {
   try {
     // Prescription is a child of medicalRecord
     try {
-      await permit.api.resourceRelations.create({
-        resource: "prescription",
-        key: "parent",
-        name: "Parent",
-        subject_resource: "medicalRecord",
+      await permit.api.resourceRelations.create(
+        "prescription",
+        {
+          key: "parent",
+          name: "Parent",
+          subject_resource: "medicalRecord",
       });
       console.log("Created 'parent' relation for prescription");
     } catch (error: any) {
@@ -300,12 +301,14 @@ async function createResourceRelations() {
 
     // Diagnosis is a child of medicalRecord
     try {
-      await permit.api.resourceRelations.create({
-        resource: "diagnosis",
-        key: "parent",
-        name: "Parent",
-        subject_resource: "medicalRecord",
-      });
+      await permit.api.resourceRelations.create(
+        "diagnosis",
+        {
+          key: "parent",
+          name: "Parent",
+          subject_resource: "medicalRecord",
+        },
+      );
       console.log("Created 'parent' relation for diagnosis");
     } catch (error: any) {
       // If it's a 409 conflict (already exists), just log and continue
