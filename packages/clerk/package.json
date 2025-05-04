@@ -1,0 +1,25 @@
+{
+    "name": "@repo/clerk",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "scripts": {
+        "lint": "biome lint ./src",
+        "format": "biome format --write .",
+        "type-check": "tsc --noEmit",
+        "test:setup": "bun src/test-setup.ts",
+        "seed": "bun src/seed.ts",
+        "example": "bun src/example.ts"
+    },
+    "dependencies": {
+        "@repo/db": "workspace:*",
+        "@repo/permit": "workspace:*",
+        "@clerk/clerk-sdk-node": "^4.13.23",
+        "dotenv": "^16.5.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.17.32",
+        "typescript": "^5.8.3"
+    }
+}
