@@ -283,8 +283,8 @@ async function createResourceRelations() {
     // Prescription is a child of medicalRecord
     try {
       await permit.api.resourceRelations.create(
-        "prescription",
-        {
+        "prescription",  // First argument - resource type
+        {  // Second argument - relation object
           key: "parent",
           name: "Parent",
           subject_resource: "medicalRecord",
@@ -303,7 +303,7 @@ async function createResourceRelations() {
     // Diagnosis is a child of medicalRecord
     try {
       await permit.api.resourceRelations.create(
-        "diagnosis", 
+        "diagnosis",
         {
           key: "parent",
           name: "Parent",
