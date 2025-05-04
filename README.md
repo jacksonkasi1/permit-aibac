@@ -9,32 +9,34 @@ This project demonstrates how to implement attribute-based access control (ABAC)
 - **Langflow**: For visual orchestration of LLM workflows
 - **LangChain.js**: For building RAG and agentic workflows in Node.js/TypeScript
 - **Permit.io**: For fine-grained authorization enforcement
-- **Upstash Vector**: For vector storage of medical data
+- **EyeLevel GroundX**: For high-accuracy RAG and vector storage of medical data
 
 The system enforces different access levels for doctors and patients, ensuring sensitive medical information is properly secured.
 
 ## Key Security Features
 
 - **Prompt Filtering**: Block unauthorized queries based on user role and intent
-- **Secure Data Retrieval**: Attribute-based filtering for medical records
+- **Secure Raw Data Retrieval**: Attribute-based filtering for medical records
 - **External Access Enforcement**: Controlled integration with external services
 - **Response Enforcement**: Post-processing to prevent data leakage
+- **Hallucination Prevention**: Using GroundX's proprietary chunking and context-aware RAG
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+ and npm/yarn
-- Docker and Docker Compose
 - Permit.io account 
-- Upstash account (for Vector DB and QStash)
+- EyeLevel GroundX API key
+- Upstash account (for QStash)
 - OpenAI API key (or alternative LLM provider)
+- Vercel account for deployment
 
 ### Installation
 
 1. Clone this repository
 ```bash
-git clone https://github.com/yourusername/permit-aibac.git
+git clone https://github.com/jacksonkasi1/permit-aibac.git
 cd permit-aibac
 ```
 
@@ -47,8 +49,8 @@ yarn install
 
 3. Set up environment variables
 ```bash
-cp .env.example .env
-# Edit .env with your credentials
+cp .env.example .env.local
+# Edit .env.local with your credentials
 ```
 
 4. Start the development server
@@ -68,6 +70,23 @@ http://localhost:3000
 http://localhost:7860
 ```
 
+### Deployment
+
+To deploy to Vercel:
+
+1. Push your code to a GitHub repository
+
+2. Import the repository in Vercel
+   
+3. Configure environment variables in Vercel dashboard:
+   - `PERMIT_API_KEY`
+   - `GROUNDX_API_KEY`
+   - `QSTASH_URL`
+   - `QSTASH_TOKEN`
+   - `OPENAI_API_KEY`
+
+4. Deploy the application
+
 ## Project Structure
 
 ```
@@ -80,7 +99,8 @@ permit-aibac/
 │   ├── lib/                # Shared utilities
 │   │   ├── langchain/     # LangChain.js configurations
 │   │   ├── permit/        # Permit.io integrations
-│   │   └── upstash/       # Upstash Vector and QStash configurations
+│   │   ├── groundx/       # EyeLevel GroundX RAG integrations
+│   │   └── upstash/       # QStash workflow configurations
 │   ├── pages/             # Next.js pages
 │   └── types/             # TypeScript type definitions
 ├── public/                # Static assets

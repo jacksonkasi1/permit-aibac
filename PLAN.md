@@ -28,7 +28,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 ┌───────────────┐      ┌───────────────────┐
 │               │      │                   │
 │  Policy Store │      │  Vector Database  │
-│  (OPA/Cloud)  │      │  (Upstash Vector) │
+│  (OPA/Cloud)  │      │  (GroundX RAG)    │
 └───────────────┘      └───────────────────┘
 ```
 
@@ -38,16 +38,19 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - Next.js web interface for user authentication and interaction
 - Role-specific UI components for doctors and patients
 - React components for medical data visualization
+- Vercel deployment for frontend and API routes
 
 ### 3.2. API Gateway
 - Next.js API routes handling authentication and request routing
 - Integration with Permit.io for initial authorization checks
 - Request validation and sanitization
+- Serverless functions via Vercel
 
 ### 3.3. Langflow Orchestration
 - Visual workflow builder for AI agent configuration
 - Custom nodes for Permit.io integration
 - Flow management for different medical use cases
+- External hosting or cloud deployment
 
 ### 3.4. LangChain.js Components
 - RAG pipeline for medical data retrieval
@@ -59,10 +62,12 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - Real-time permission checks
 - Attribute-based filtering for medical data
 
-### 3.6. Vector Database
-- Upstash Vector for storing medical record embeddings
-- Access patterns designed for secure retrieval
-- Data partitioning based on sensitivity levels
+### 3.6. Vector Database (EyeLevel GroundX)
+- Proprietary RAG ingestion pipeline for medical documents
+- Anti-hallucination technology with dynamic chunking
+- Context-aware metadata generation
+- Semantic object creation for higher retrieval accuracy
+- Enterprise-grade security with encryption at rest and in transit
 
 ### 3.7. Upstash QStash
 - Asynchronous workflow processing
@@ -80,6 +85,8 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - Attribute-based filtering before vector search execution
 - Field-level masking for sensitive information (insurance IDs, full diagnoses)
 - Role-specific data views enforced at retrieval time
+- GroundX's proprietary search engine for improved accuracy over standard vector similarity
+- Result re-ranking based on question relevance
 
 ### 4.3. External Access Enforcement
 - Tool usage permission checks before execution
@@ -90,17 +97,20 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - Post-processing of AI responses to remove unauthorized information
 - Content filtering for inappropriate or toxic content
 - Final permission check before delivering response to user
+- Reduction of hallucinations through GroundX's semantic object processing
 
 ## 5. Implementation Phases
 
 ### Phase 1: Environment Setup and Core Components (Weeks 1-2)
 - [ ] Set up Next.js development environment
 - [ ] Configure Langflow instance
-- [ ] Initialize Upstash Vector database
+- [ ] Create EyeLevel GroundX account and obtain API key
+- [ ] Initialize GroundX buckets for medical data storage
 - [ ] Set up Upstash QStash for workflows
 - [ ] Create Permit.io account and initial policies
 - [ ] Establish basic Next.js API routes structure
 - [ ] Set up authentication system (Auth0/NextAuth.js)
+- [ ] Configure Vercel project for deployment
 
 ### Phase 2: Authorization Framework (Weeks 3-4)
 - [ ] Implement Permit.io SDK integration
@@ -109,14 +119,16 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Design attribute schema for medical records
 - [ ] Implement basic authorization checks
 - [ ] Test permission enforcement
+- [ ] Deploy authorization layer to Vercel
 
-### Phase 3: LangChain.js and RAG Implementation (Weeks 5-6)
-- [ ] Create embeddings pipeline for medical data
-- [ ] Implement vector search with pre-filtering
-- [ ] Build custom LangChain.js agents for medical domain
-- [ ] Integrate Permit.io checks with LangChain.js tools
+### Phase 3: GroundX RAG and LangChain.js Implementation (Weeks 5-6)
+- [ ] Upload medical documents to GroundX via API
+- [ ] Build document ingest pipeline for medical data
+- [ ] Implement GroundX-powered search with LangChain.js
+- [ ] Integrate Permit.io checks with RAG workflow
 - [ ] Set up LangSmith for tracing
 - [ ] Create secure retrieval patterns
+- [ ] Configure Vercel serverless functions for RAG
 
 ### Phase 4: Langflow Orchestration (Weeks 7-8)
 - [ ] Design custom Langflow components for Permit.io
@@ -124,6 +136,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Implement security-focused flow patterns
 - [ ] Connect Langflow to backend services
 - [ ] Test end-to-end workflows
+- [ ] Configure Vercel Edge functions for optimal performance
 
 ### Phase 5: Security Hardening and Testing (Weeks 9-10)
 - [ ] Implement comprehensive security testing suite
@@ -132,6 +145,7 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Verify data isolation between roles
 - [ ] Validate all security controls
 - [ ] Document security architecture
+- [ ] Finalize production deployment on Vercel
 
 ## 6. Detailed Technical Tasks
 
@@ -171,11 +185,10 @@ export const permitMiddleware = async (
 };
 ```
 
-### 6.2. Secure RAG Implementation
+### 6.2. EyeLevel GroundX RAG Implementation
 ```typescript
-// Example: Secure RAG retrieval with permission filtering
-import { UpstashVectorStore } from "@langchain/upstash";
-import { RetrievalQAChain } from "langchain/chains";
+// Example: Secure RAG implementation with GroundX and LangChain.js
+import axios from 'axios';
 import { ChatOpenAI } from "@langchain/openai";
 import { Permit } from 'permitio';
 
@@ -184,39 +197,84 @@ const permit = new Permit({
   token: process.env.PERMIT_API_KEY
 });
 
+// Initialize GroundX API client
+const groundxAPI = axios.create({
+  baseURL: 'https://api.groundx.ai/api/v1',
+  headers: {
+    'X-API-Key': process.env.GROUNDX_API_KEY,
+    'Content-Type': 'application/json'
+  }
+});
+
+/**
+ * Upload a document to GroundX
+ */
+async function uploadMedicalDocument(filePath: string, fileName: string, bucketId: number) {
+  const fileData = await fs.readFile(filePath);
+  const base64Data = fileData.toString('base64');
+  
+  const response = await groundxAPI.post('/ingest/documents/local', [{
+    blob: base64Data,
+    metadata: {
+      bucketId: bucketId,
+      fileName: fileName,
+      fileType: getFileType(fileName),
+      // You can add custom metadata attributes to filter on later
+      searchData: {
+        isConfidential: true,
+        department: 'cardiology',
+        lastUpdated: new Date().toISOString()
+      }
+    }
+  }]);
+  
+  return response.data;
+}
+
+/**
+ * Perform secure retrieval based on user permissions
+ */
 async function secureRetrieval(user: User, query: string) {
   // Get user permissions
   const userAttrs = await permit.getUserAttributes(user.id);
   
   // Create filters based on permissions
-  const permittedFilters = createPermissionFilters(userAttrs);
+  const permissionFilters = createPermissionFilters(userAttrs);
   
-  // Initialize retriever with permission filters
-  const vectorStore = await UpstashVectorStore.fromExistingIndex(
-    new OpenAIEmbeddings(),
-    {
-      url: process.env.UPSTASH_VECTOR_REST_URL,
-      token: process.env.UPSTASH_VECTOR_REST_TOKEN,
-      indexName: "medical_records",
-      filter: permittedFilters
-    }
-  );
-  
-  const retriever = vectorStore.asRetriever({
-    searchKwargs: { k: 5 }
+  // Search for relevant content with GroundX
+  const searchResponse = await groundxAPI.post('/search/content', {
+    query: query,
+    filter: permissionFilters,
+    n: 5, // Number of results to return
+    includeMetadata: true
   });
   
-  // Create QA chain with the secure retriever
+  const { results } = searchResponse.data;
+  
+  // Filter out any sensitive information based on user role
+  const filteredContexts = results.map(result => {
+    if (user.role !== 'doctor' && result.metadata?.isConfidential) {
+      return sanitizeConfidentialContent(result.content);
+    }
+    return result.content;
+  });
+  
+  // Create the context for the LLM
+  const context = filteredContexts.join('\n\n');
+  
+  // Generate response using OpenAI
   const model = new ChatOpenAI({ 
     temperature: 0, 
     modelName: "gpt-4-turbo"
   });
   
-  const chain = RetrievalQAChain.fromLLM(model, retriever);
+  const response = await model.invoke([
+    ["system", `You are a medical assistant. Use ONLY the following context to answer the question: ${context}`],
+    ["user", query]
+  ]);
   
-  // Execute query with post-processing
-  const result = await chain.call({ query });
-  const filteredResponse = await postProcessResponse(result, userAttrs);
+  // Apply post-response filtering
+  const filteredResponse = await postProcessResponse(response.content, userAttrs);
   
   return filteredResponse;
 }
@@ -227,10 +285,20 @@ async function secureRetrieval(user: User, query: string) {
 // Example: Next.js API workflow endpoint with Upstash QStash
 import { serve } from "@upstash/workflow/nextjs";
 import { Permit } from 'permitio';
+import axios from 'axios';
 
 const permit = new Permit({
   pdp: 'https://cloudpdp.permit.io',
   token: process.env.PERMIT_API_KEY
+});
+
+// GroundX API client
+const groundxAPI = axios.create({
+  baseURL: 'https://api.groundx.ai/api/v1',
+  headers: {
+    'X-API-Key': process.env.GROUNDX_API_KEY,
+    'Content-Type': 'application/json'
+  }
 });
 
 // Define workflow for processing patient history updates
@@ -262,19 +330,34 @@ export const { POST } = serve(async (context) => {
   }
   
   // Process the update in steps
-  await context.run("sanitize_data", async () => {
+  const sanitizedData = await context.run("sanitize_data", async () => {
     // Sanitize and validate incoming data
     return sanitizePatientData(recordData);
   });
   
-  const vectorData = await context.run("prepare_vector_data", async () => {
-    // Prepare data for vector storage
-    return prepareVectorData(recordData);
-  });
-  
-  await context.run("update_vector_db", async () => {
-    // Update vector database with new data
-    await updateVectorDatabase(patientId, vectorData);
+  // Upload document to GroundX
+  const documentUpload = await context.run("upload_to_groundx", async () => {
+    // Convert the data to a suitable format
+    const base64Data = Buffer.from(
+      JSON.stringify(sanitizedData)
+    ).toString('base64');
+    
+    // Upload to GroundX
+    const response = await groundxAPI.post('/ingest/documents/local', [{
+      blob: base64Data,
+      metadata: {
+        bucketId: process.env.GROUNDX_BUCKET_ID,
+        fileName: `patient_${patientId}_update_${Date.now()}.json`,
+        fileType: 'json',
+        searchData: {
+          patientId,
+          doctorId,
+          updatedAt: new Date().toISOString()
+        }
+      }
+    }]);
+    
+    return response.data;
   });
   
   await context.run("send_notification", async () => {
@@ -282,11 +365,44 @@ export const { POST } = serve(async (context) => {
     await sendNotification(patientId, "Your medical record has been updated");
   });
   
-  return { status: "success" };
+  return { 
+    status: "success",
+    documentId: documentUpload[0].id 
+  };
 });
 ```
 
-### 6.4. Langflow Custom Component
+### 6.4. Vercel Deployment Configuration
+```json
+// vercel.json
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "src/api/workflow/*.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "src/api/chat/*.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "OPENAI_API_KEY": "@openai_api_key",
+    "PERMIT_API_KEY": "@permit_api_key",
+    "GROUNDX_API_KEY": "@groundx_api_key",
+    "GROUNDX_BUCKET_ID": "@groundx_bucket_id",
+    "QSTASH_URL": "@qstash_url",
+    "QSTASH_TOKEN": "@qstash_token"
+  }
+}
+```
+
+### 6.5. Langflow Custom Component
 ```typescript
 // Example of how you'd build a Langflow component connector in TypeScript
 // This would connect to the Python-based Langflow server
@@ -363,12 +479,15 @@ class PermitSecurityFilter {
 - Attempts to access prohibited data through prompt engineering
 - Testing of data leakage in responses
 - Verification of attribute-based filtering
+- Hallucination detection and mitigation efficacy tests
 
 ### 7.2. Functional Testing
 - Role-specific user journeys
 - End-to-end workflow verification using Jest and Cypress
 - Error handling and edge cases
 - Performance under various load conditions
+- Serverless function limits and edge cases in Vercel environment
+- GroundX RAG accuracy and recall comparison tests
 
 ### 7.3. Test Cases
 
@@ -381,11 +500,15 @@ class PermitSecurityFilter {
 | TC-005 | Doctor books appointment for patient | Operation allowed |
 | TC-006 | Patient attempts to book premium appointment | Operation denied |
 | TC-007 | Response contains unauthorized information | Information filtered before delivery |
+| TC-008 | Vercel function timeout handling | Graceful failure with user notification |
+| TC-009 | Medical document with complex tables and charts | Accurate parsing and retrieval by GroundX |
+| TC-010 | Ambiguous medical query that could cause hallucination | Factual, source-backed response from GroundX RAG |
 
 ## 8. Next Steps After PoC
 
-- Production deployment architecture (Vercel/Netlify)
+- Production scale Vercel deployment
 - Enhanced monitoring and alerting
 - Expanded policy model for complex medical scenarios
 - Integration with medical information systems
 - User feedback collection and iteration
+- Additional GroundX buckets for specialized medical domains
