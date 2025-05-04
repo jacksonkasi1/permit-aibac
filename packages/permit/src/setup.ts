@@ -1,14 +1,22 @@
 import { config } from "dotenv";
 import { Permit } from "permitio";
-import { ResourceConfig, RoleConfig, ConditionSetConfig } from "./types";
+import { ResourceConfig, RoleConfig } from "./types";
 
 // Load environment variables
 config();
+
+console.log("Starting Permit.io setup...");
 
 // Initialize Permit.io client
 const permit = new Permit({
   pdp: process.env.PERMIT_PDP_URL || "https://cloudpdp.api.permit.io",
   token: process.env.PERMIT_API_KEY || "",
+  // Add debug logging
+  log: {
+    level: "debug",
+  },
+  // Optional: throw on network errors
+  throwOnError: true,
 });
 
 // Define all resources from PERMIT-TABLE.md
@@ -184,68 +192,26 @@ const roles: RoleConfig[] = [
   },
 ];
 
-// Define ABAC conditions from PERMIT-TABLE.md
-const conditionSets: ConditionSetConfig[] = [
-  {
-    key: "high_clearance_records",
-    name: "High Clearance Records Access",
-    conditions: {
-      allOf: [
-        {
-          user: {
-            clearance: {
-              gte: 4,
-            },
-          },
-        },
-        {
-          resource: {
-            sensitivity: {
-              eq: "Restricted",
-            },
-          },
-        },
-      ],
-    },
-  },
-  {
-    key: "department_specific_access",
-    name: "Department Specific Access",
-    conditions: {
-      allOf: [
-        {
-          user: {
-            department: {
-              eq: "$resource.department",
-            },
-          },
-        },
-      ],
-    },
-  },
-];
+// Main setup function
+async function setup() {
+  try {
+    console.log("Starting resources and permissions configuration...");
 
-// User attribute configuration
-const userAttributeConfig = {
-  attributes: {
-    department: {
-      type: "string",
-      description: "Medical department",
-    },
-    clearance: {
-      type: "number",
-      description: "Data access clearance level (1-5)",
-    },
-    specialization: {
-      type: "string",
-      description: "Medical specialization",
-    },
-    isBlocked: {
-      type: "boolean",
-      description: "User access restriction flag",
-    },
-  },
-};
+    // Create resources first (they're needed for roles)
+    await createResources();
+
+    // Create roles with permissions
+    await createRoles();
+
+    // Create resource relations for ReBAC
+    await createResourceRelations();
+
+    console.log("Permit.io setup completed successfully");
+  } catch (error) {
+    console.error("Permit.io setup failed:", error);
+    process.exit(1);
+  }
+}
 
 // Create resources
 async function createResources() {
@@ -263,6 +229,7 @@ async function createResources() {
       }
 
       if (!resourceExists) {
+        // The newer API uses resource instead of resources
         await permit.api.resources.create(resource);
         console.log(`Created resource: ${resource.key}`);
       } else {
@@ -313,121 +280,49 @@ async function createResourceRelations() {
   console.log("Creating resource relations...");
 
   try {
-    // Patient owns MedicalRecord
-    await permit.api.resourceRelations.create({
-      resource: "medicalRecord",
-      relation: "owner",
-      subject_resource: "user",
-    });
+    // Prescription is a child of medicalRecord
+    try {
+      await permit.api.resourceRelations.create(
+        "prescription",
+        {
+          key: "parent",
+          name: "Parent",
+          subject_resource: "medicalRecord",
+        }
+      );
+      console.log("Created 'parent' relation for prescription");
+    } catch (error: any) {
+      // If it's a 409 conflict (already exists), just log and continue
+      if (error?.originalError?.status === 409) {
+        console.log("Relation 'parent' already exists for prescription");
+      } else {
+        throw error;
+      }
+    }
 
-    // Doctor treats Patient
-    await permit.api.resourceRelations.create({
-      resource: "user",
-      relation: "treating_physician",
-      subject_resource: "user",
-    });
+    // Diagnosis is a child of medicalRecord
+    try {
+      await permit.api.resourceRelations.create(
+        "diagnosis", 
+        {
+          key: "parent",
+          name: "Parent",
+          subject_resource: "medicalRecord",
+        }
+      );
+      console.log("Created 'parent' relation for diagnosis");
+    } catch (error: any) {
+      // If it's a 409 conflict (already exists), just log and continue
+      if (error?.originalError?.status === 409) {
+        console.log("Relation 'parent' already exists for diagnosis");
+      } else {
+        throw error;
+      }
+    }
 
-    console.log("Created resource relations");
+    console.log("Resource relations setup completed");
   } catch (error) {
     console.error("Error creating resource relations:", error);
-  }
-}
-
-// Create condition sets for ABAC
-async function createConditionSets() {
-  console.log("Creating condition sets...");
-
-  for (const conditionSet of conditionSets) {
-    try {
-      let conditionSetExists = false;
-      try {
-        await permit.api.conditionSets.get(conditionSet.key);
-        conditionSetExists = true;
-      } catch (err) {
-        console.log(`Condition set ${conditionSet.key} does not exist yet. Creating...`);
-      }
-
-      if (!conditionSetExists) {
-        await permit.api.conditionSets.create(conditionSet);
-        console.log(`Created condition set: ${conditionSet.key}`);
-      } else {
-        console.log(`Condition set ${conditionSet.key} already exists. Updating...`);
-        await permit.api.conditionSets.update(conditionSet.key, conditionSet);
-      }
-    } catch (error) {
-      console.error(`Error creating condition set ${conditionSet.key}:`, error);
-    }
-  }
-}
-
-// Configure user attributes
-async function configureUserAttributes() {
-  console.log("Configuring user attributes...");
-
-  try {
-    await permit.api.usersConfig.setUserAttributeConfig(userAttributeConfig);
-    console.log("User attributes configured");
-  } catch (error) {
-    console.error("Error configuring user attributes:", error);
-  }
-}
-
-// Apply condition sets to permissions
-async function applyConditionSets() {
-  console.log("Applying condition sets to permissions...");
-
-  try {
-    // Apply high clearance condition to restricted medical records
-    await permit.api.conditionSetRules.create({
-      condition_set_key: "high_clearance_records",
-      permission: {
-        action: "view",
-        resource: "medicalRecord",
-      },
-    });
-
-    // Apply department condition to medical records
-    await permit.api.conditionSetRules.create({
-      condition_set_key: "department_specific_access",
-      permission: {
-        action: "view",
-        resource: "medicalRecord",
-      },
-    });
-
-    console.log("Applied condition sets to permissions");
-  } catch (error) {
-    console.error("Error applying condition sets:", error);
-  }
-}
-
-// Main setup function
-async function setup() {
-  try {
-    console.log("Starting Permit.io setup...");
-
-    // Create resources first (they're needed for roles)
-    await createResources();
-
-    // Create roles with permissions
-    await createRoles();
-
-    // Create resource relations for ReBAC
-    await createResourceRelations();
-
-    // Configure user attributes for ABAC
-    await configureUserAttributes();
-
-    // Create condition sets for ABAC
-    await createConditionSets();
-
-    // Apply condition sets to permissions
-    await applyConditionSets();
-
-    console.log("Permit.io setup completed successfully");
-  } catch (error) {
-    console.error("Permit.io setup failed:", error);
-    process.exit(1);
   }
 }
 
