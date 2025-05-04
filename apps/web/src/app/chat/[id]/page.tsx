@@ -1,11 +1,10 @@
 "use client";
 
 import { getChatHistory } from "@/api/chat.api";
-import { PromptChat } from "@/components/chat/prompt-chat";
-import { PageHeader } from "@/components/layout/page-header";
 import { type Message } from "ai";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ChatLayout } from "./_components/chat-layout";
 
 export default function ChatPage() {
   const params = useParams<{ id: string }>();
@@ -22,7 +21,7 @@ export default function ChatPage() {
 
         // Find messages for this chat ID (if implementation supports it)
         // For now, we'll just start with an empty chat
-
+        // setInitialMessages(response.history);
         setIsLoading(false);
       } catch (error) {
         console.error("Failed to load chat history:", error);
@@ -35,7 +34,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen flex-col">
-      <PageHeader title="Chat" description="Conversation with AI" />
 
       <div className="flex-1 overflow-hidden">
         {isLoading ? (
@@ -43,7 +41,7 @@ export default function ChatPage() {
             <div className="animate-pulse">Loading conversation...</div>
           </div>
         ) : (
-          <PromptChat id={chatId} initialMessages={initialMessages} />
+          <ChatLayout id={chatId} initialMessages={initialMessages} />
         )}
       </div>
     </div>

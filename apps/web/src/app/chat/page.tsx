@@ -12,11 +12,11 @@ import { useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 const SAMPLE_PROMPTS = [
-  "Tell me about your AI services",
-  "How can I use your API?",
-  "What's new in the latest release?",
-  "Can you help me with coding?",
-  "Generate a sample policy",
+  "Explain how to manage my diabetes medication",
+  "What are the symptoms of high blood pressure?",
+  "How often should I check my blood sugar levels?",
+  "What dietary changes can help with cholesterol?",
+  "Generate a sample wellness plan for heart health",
 ];
 
 export default function ChatPage() {
@@ -47,8 +47,8 @@ export default function ChatPage() {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <div className="px-4 py-6 text-center">
-          <h1 className="font-bold text-4xl">Chat bot template</h1>
-          <p className="mt-2 text-lg text-muted-foreground">Ask any chat questions</p>
+          <h1 className="font-bold text-4xl">Healthcare Assistant</h1>
+          <p className="mt-2 text-lg text-muted-foreground">Your AI guide to health and wellness</p>
         </div>
 
         {/* Chat area */}
@@ -66,7 +66,7 @@ export default function ChatPage() {
 
         {/* Toggle button and suggestions */}
         <div className="border-t">
-          <div className="mx-auto w-full max-w-3xl">
+          <div className="mx-auto w-full max-w-4xl">
             <div className="flex justify-center py-2">
               <Button
                 variant="ghost"

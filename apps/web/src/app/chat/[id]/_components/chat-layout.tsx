@@ -5,22 +5,24 @@ import { Button } from "@/components/ui/button";
 import { ChatContainer } from "@/components/ui/chat-container";
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { ScrollButton } from "@/components/ui/scroll-button";
+import { Message } from "ai";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useRef, useState } from "react";
 
 const FOLLOW_UP_PROMPTS = [
-  "Tell me more about that",
-  "Can you explain with an example?",
-  "What are the alternatives?",
-  "How can I implement this?",
-  "What are the best practices?",
+  "What are the potential side effects?",
+  "How does this affect my existing condition?",
+  "Are there any lifestyle changes I should make?",
+  "When should I consult my doctor?",
+  "Can you provide more detailed information?",
 ];
 
 interface ChatLayoutProps {
   id: string;
+  initialMessages?: Array<Message>;
 }
 
-export function ChatLayout({ id }: ChatLayoutProps) {
+export function ChatLayout({ id, initialMessages = [] }: ChatLayoutProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(true);
   const chatRef = useRef<{
@@ -49,7 +51,7 @@ export function ChatLayout({ id }: ChatLayoutProps) {
           <div className="h-full">
             <PromptChat
               id={id}
-              initialMessages={[]}
+              initialMessages={initialMessages}
               isReadonly={false}
               initialInput={inputValue}
               ref={chatRef}
