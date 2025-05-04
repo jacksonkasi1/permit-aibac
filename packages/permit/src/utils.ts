@@ -1,5 +1,5 @@
 import { permit } from "./index";
-import { UserAttributes, ResourceAttributes } from "./types";
+import { ResourceAttributes, UserAttributes } from "./types";
 
 /**
  * Authorize a RAG (Retrieval Augmented Generation) query based on user permissions

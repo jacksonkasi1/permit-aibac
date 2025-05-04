@@ -1,23 +1,23 @@
-# Permit.io + LangChain.js + Langflow PoC Project Plan
+# Permit.io + Vercel AI SDK + Google AI PoC Project Plan
 
 ## 1. Project Overview
 
-This Proof of Concept (PoC) demonstrates a secure AI system for medical data access with fine-grained authorization using Permit.io, LangChain.js, and Langflow. The system enforces attribute-based access control (ABAC) to protect sensitive medical information while providing personalized AI interactions based on user roles (Doctor or Patient).
+This Proof of Concept (PoC) demonstrates a secure AI system for medical data access with fine-grained authorization using Permit.io, Vercel AI SDK, and Google AI. The system enforces attribute-based access control (ABAC) to protect sensitive medical information while providing personalized AI interactions based on user roles (Doctor or Patient).
 
 ## 2. System Architecture
 
 ```
 ┌──────────────┐       ┌───────────────────┐        ┌─────────────────┐
 │              │       │                   │        │                 │
-│   Frontend   ├──────►│   API Gateway     ├───────►│  Langflow       │
-│   (Next.js)  │       │   (Next.js API)   │        │  Orchestration  │
+│   Frontend   ├──────►│   API Gateway     ├───────►│  AI Pipeline    │
+│   (Next.js)  │       │   (Bun + Hono)    │        │  Orchestration  │
 └──────────────┘       └───────────────────┘        └─────────┬───────┘
                                                               │
                                                               ▼
 ┌───────────────┐      ┌───────────────────┐        ┌─────────────────┐
 │               │      │                   │        │                 │
-│  Permit.io    │◄─────┤   LangChain.js    │◄───────┤  LLM Service    │
-│  Controls     │      │   Agents/RAG      │        │  (OpenAI/etc)   │
+│  Permit.io    │◄─────┤   Vercel AI SDK   │◄───────┤  Google AI      │
+│  Controls     │      │   with RAG        │        │  (Gemini)       │
 └───────┬───────┘      └─────────┬─────────┘        └─────────────────┘
         │                        │
         │                        │                  ┌─────────────────┐
@@ -41,21 +41,21 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - Vercel deployment for frontend and API routes
 
 ### 3.2. API Gateway
-- Next.js API routes handling authentication and request routing
+- Bun + Hono API routes handling authentication and request routing
 - Integration with Permit.io for initial authorization checks
 - Request validation and sanitization
 - Serverless functions via Vercel
 
-### 3.3. Langflow Orchestration
-- Visual workflow builder for AI agent configuration
-- Custom nodes for Permit.io integration
+### 3.3. AI Pipeline Orchestration
+- Structured workflows for AI agent configuration
+- Custom integrations for Permit.io
 - Flow management for different medical use cases
 - External hosting or cloud deployment
 
-### 3.4. LangChain.js Components
+### 3.4. Vercel AI SDK Components
 - RAG pipeline for medical data retrieval
 - Custom agents with role-based tool access
-- LangSmith integration for tracing and debugging
+- Streaming responses with reasoning for transparency
 
 ### 3.5. Permit.io Authorization Layer
 - ABAC policy enforcement for all system interactions
@@ -103,13 +103,13 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 
 ### Phase 1: Environment Setup and Core Components
 - [ ] Set up Next.js development environment
-- [ ] Configure Langflow instance
+- [ ] Configure AI components using Vercel AI SDK
 - [ ] Create EyeLevel GroundX account and obtain API key
 - [ ] Initialize GroundX buckets for medical data storage
 - [ ] Set up Upstash QStash for workflows
 - [ ] Create Permit.io account and initial policies
-- [ ] Establish basic Next.js API routes structure
-- [ ] Set up authentication system (Auth0/NextAuth.js)
+- [ ] Establish basic Hono API routes structure
+- [ ] Set up authentication system (Clerk)
 - [ ] Configure Vercel project for deployment
 
 ### Phase 2: Authorization Framework
@@ -121,20 +121,20 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Test permission enforcement
 - [ ] Deploy authorization layer to Vercel
 
-### Phase 3: GroundX RAG and LangChain.js Implementation
+### Phase 3: GroundX RAG and Vercel AI SDK Implementation
 - [ ] Upload medical documents to GroundX via API
 - [ ] Build document ingest pipeline for medical data
-- [ ] Implement GroundX-powered search with LangChain.js
+- [ ] Implement GroundX-powered search with Vercel AI SDK
 - [ ] Integrate Permit.io checks with RAG workflow
-- [ ] Set up LangSmith for tracing
+- [ ] Set up Google AI integration for LLM
 - [ ] Create secure retrieval patterns
 - [ ] Configure Vercel serverless functions for RAG
 
-### Phase 4: Langflow Orchestration
-- [ ] Design custom Langflow components for Permit.io
+### Phase 4: AI Pipeline Orchestration
+- [ ] Design custom AI components for Permit.io
 - [ ] Create flow templates for different medical scenarios
 - [ ] Implement security-focused flow patterns
-- [ ] Connect Langflow to backend services
+- [ ] Connect AI pipeline to backend services
 - [ ] Test end-to-end workflows
 - [ ] Configure Vercel Edge functions for optimal performance
 
@@ -151,9 +151,9 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 
 ### 6.1. Permit.io Integration
 ```typescript
-// Example: Next.js API middleware for Permit.io integration
-import { NextApiRequest, NextApiResponse } from 'next';
+// Example: Hono middleware for Permit.io integration
 import { Permit } from 'permitio';
+import { type Context, type Next } from 'hono';
 
 const permit = new Permit({
   pdp: 'https://cloudpdp.permit.io',
@@ -161,24 +161,23 @@ const permit = new Permit({
 });
 
 export const permitMiddleware = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-  next: () => void
+  c: Context,
+  next: Next
 ) => {
   // Extract user and resource information
-  const user = await getSessionUser(req);
-  const resource = getRequestedResource(req);
+  const user = await getSessionUser(c);
+  const resource = getRequestedResource(c);
   
   // Check permissions using Permit.io
   const allowed = await permit.check({
     user: user.id,
-    action: req.method || 'READ',
+    action: c.req.method || 'READ',
     resource: resource.type,
     context: { attributes: resource.attributes }
   });
   
   if (!allowed) {
-    return res.status(403).json({ error: 'Not authorized' });
+    return c.json({ error: 'Not authorized' }, 403);
   }
   
   return next();
@@ -187,9 +186,10 @@ export const permitMiddleware = async (
 
 ### 6.2. EyeLevel GroundX RAG Implementation
 ```typescript
-// Example: Secure RAG implementation with GroundX and LangChain.js
+// Example: Secure RAG implementation with GroundX and Vercel AI SDK
 import axios from 'axios';
-import { ChatOpenAI } from "@langchain/openai";
+import { streamText } from "ai";
+import { google } from "@ai-sdk/google";
 import { Permit } from 'permitio';
 
 const permit = new Permit({
@@ -262,27 +262,26 @@ async function secureRetrieval(user: User, query: string) {
   // Create the context for the LLM
   const context = filteredContexts.join('\n\n');
   
-  // Generate response using OpenAI
-  const model = new ChatOpenAI({ 
-    temperature: 0, 
-    modelName: "gpt-4-turbo"
+  // Generate streaming response using Google AI
+  const gemini = google("gemini-2.5-pro-exp-03-25");
+  
+  const result = streamText({
+    system: `You are a medical assistant. Use ONLY the following context to answer the question: ${context}`,
+    messages: [{ role: "user", content: query }],
+    model: gemini,
+    maxSteps: 10,
   });
   
-  const response = await model.invoke([
-    ["system", `You are a medical assistant. Use ONLY the following context to answer the question: ${context}`],
-    ["user", query]
-  ]);
-  
   // Apply post-response filtering
-  const filteredResponse = await postProcessResponse(response.content, userAttrs);
+  // This would be implemented in the API layer when handling the stream
   
-  return filteredResponse;
+  return result;
 }
 ```
 
 ### 6.3. Upstash QStash Workflow
 ```typescript
-// Example: Next.js API workflow endpoint with Upstash QStash
+// Example: Hono API workflow endpoint with Upstash QStash
 import { serve } from "@upstash/workflow/nextjs";
 import { Permit } from 'permitio';
 import axios from 'axios';
@@ -392,7 +391,7 @@ export const { POST } = serve(async (context) => {
     }
   },
   "env": {
-    "OPENAI_API_KEY": "@openai_api_key",
+    "GOOGLE_AI_API_KEY": "@google_ai_api_key",
     "PERMIT_API_KEY": "@permit_api_key",
     "GROUNDX_API_KEY": "@groundx_api_key",
     "GROUNDX_BUCKET_ID": "@groundx_bucket_id",
@@ -402,49 +401,26 @@ export const { POST } = serve(async (context) => {
 }
 ```
 
-### 6.5. Langflow Custom Component
+### 6.5. Custom AI Component
 ```typescript
-// Example of how you'd build a Langflow component connector in TypeScript
-// This would connect to the Python-based Langflow server
+// Example of a custom AI component connector
 import axios from 'axios';
+import { google } from "@ai-sdk/google";
 import { Permit } from 'permitio';
 
 class PermitSecurityFilter {
   private permitClient: any;
-  private langflowApiKey: string;
-  private langflowUrl: string;
+  private apiKey: string;
 
   constructor(config: {
     permitApiKey: string, 
-    langflowApiKey: string,
-    langflowUrl: string
+    googleApiKey: string,
   }) {
     this.permitClient = new Permit({
       pdp: 'https://cloudpdp.permit.io',
       token: config.permitApiKey
     });
-    this.langflowApiKey = config.langflowApiKey;
-    this.langflowUrl = config.langflowUrl;
-  }
-
-  async registerComponent() {
-    // Register custom component with Langflow
-    const componentDef = {
-      name: "PermitSecurityFilter",
-      displayName: "Permit.io Security Filter",
-      description: "Filters prompts and responses based on Permit.io policies",
-      // Component definition details would go here
-    };
-
-    await axios.post(
-      `${this.langflowUrl}/api/v1/custom-components`,
-      componentDef,
-      {
-        headers: {
-          Authorization: `Bearer ${this.langflowApiKey}`
-        }
-      }
-    );
+    this.apiKey = config.googleApiKey;
   }
 
   async checkPromptPermission(userId: string, action: string, resource: string, prompt: string, data: any) {
@@ -467,6 +443,47 @@ class PermitSecurityFilter {
       status: "approved", 
       filteredPrompt: prompt 
     };
+  }
+
+  async processSecurePrompt(userId: string, prompt: string, context: any) {
+    // First check permissions
+    const permissionCheck = await this.checkPromptPermission(
+      userId,
+      "query",
+      "medical_data",
+      prompt,
+      context
+    );
+    
+    if (permissionCheck.status === "rejected") {
+      return {
+        status: "error",
+        message: permissionCheck.reason
+      };
+    }
+    
+    // Initialize the Google AI model
+    const gemini = google("gemini-2.5-pro-exp-03-25");
+    
+    // Process with the AI
+    // In production, this would be a streaming response
+    try {
+      const response = await gemini.invoke([
+        { role: "system", content: "You are a medical assistant. Respond only with verified information." },
+        { role: "user", content: permissionCheck.filteredPrompt }
+      ]);
+      
+      return {
+        status: "success",
+        response: response.content
+      };
+    } catch (error) {
+      console.error("AI processing error:", error);
+      return {
+        status: "error",
+        message: "Failed to process your request"
+      };
+    }
   }
 }
 ```

@@ -1,5 +1,5 @@
-import { permit } from "./index";
 import { Context } from "hono";
+import { permit } from "./index";
 /**
  * Middleware for Hono API routes that checks permissions using Permit.io
  *

@@ -1,13 +1,13 @@
 # Secure AI Medical System PoC
 
-A proof-of-concept integrating Permit.io, LangChain.js, and Langflow to create a secure AI system with fine-grained access controls for medical data.
+A proof-of-concept integrating Permit.io, Vercel AI SDK, and Google AI to create a secure AI system with fine-grained access controls for medical data.
 
 ## Overview
 
 This project demonstrates how to implement attribute-based access control (ABAC) within an AI system using:
 
-- **Langflow**: For visual orchestration of LLM workflows
-- **LangChain.js**: For building RAG and agentic workflows in Node.js/TypeScript
+- **Vercel AI SDK**: For building and deploying AI-powered applications
+- **Google AI**: For advanced language models (Gemini) with robust RAG capabilities
 - **Permit.io**: For fine-grained authorization enforcement
 - **EyeLevel GroundX**: For high-accuracy RAG and vector storage of medical data
 
@@ -29,7 +29,7 @@ The system enforces different access levels for doctors and patients, ensuring s
 - Permit.io account 
 - EyeLevel GroundX API key
 - Upstash account (for QStash)
-- OpenAI API key (or alternative LLM provider)
+- Google AI API key
 - Vercel account for deployment
 
 ### Installation
@@ -61,11 +61,6 @@ bun run dev
 http://localhost:3000
 ```
 
-6. Access the Langflow UI (if running separately)
-```
-http://localhost:7860
-```
-
 ### Deployment
 
 To deploy to Vercel:
@@ -79,7 +74,7 @@ To deploy to Vercel:
    - `GROUNDX_API_KEY`
    - `QSTASH_URL`
    - `QSTASH_TOKEN`
-   - `OPENAI_API_KEY`
+   - `GOOGLE_AI_API_KEY`
 
 4. Deploy the application
 
@@ -95,7 +90,6 @@ permit-aibac/
 │   ├── id/          # Identity utilities
 │   ├── logs/        # Logging utilities
 │   ├── typescript-config/ # Shared tsconfig
-│   ├── langchain/   # LangChain.js configurations
 │   ├── permit/      # Permit.io integrations
 │   ├── groundx/     # EyeLevel GroundX RAG integrations
 │   └── upstash/     # QStash workflow configurations
