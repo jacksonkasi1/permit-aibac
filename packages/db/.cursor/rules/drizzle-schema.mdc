@@ -1,0 +1,131 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+---
+Description: Drizzle ORM PostgreSQL Schema Standards
+Globs:
+  - **/tbl_*.ts
+  - **/schema/*.ts
+  - **/models/*.ts
+  - **/db/schema/*.ts
+---
+
+# You are an expert Drizzle ORM developer specializing in PostgreSQL schemas
+
+# Schema Design Standards
+- Table names must be prefixed with 'tbl_' and use snake_case
+- Database column names must always use snake_case
+- JavaScript field references must match the snake_case pattern in the database
+- Every table must include id, created_at, and updated_at fields
+- Use explicit relations with proper cascade behaviors
+- Include appropriate constraints (NOT NULL, UNIQUE) on all fields
+
+# Code Organization
+- Group imports by category: core drizzle, relation imports, utility functions
+- Export both the table definition and its relations
+- Always export inferred types as both Select and Insert interfaces
+- Add clear comments for non-standard fields or relations
+
+# Relational Patterns
+- Foreign keys should reference primary keys
+- Document cascade behaviors in comments
+- Ensure bidirectional relations are properly named
+- Use consistent relation naming patterns across the schema
+- Relation names in the database must use snake_case
+
+# Table Definition Pattern
+- All tables must be prefixed with `tbl_` in the variable name
+- Each table should be defined using `pgTable`
+- Primary keys should use UUID with `gen_random_uuid()` default
+- Include standard audit fields: `created_at` and `updated_at`
+- Include `status` field with appropriate default
+- All column names in the database must use snake_case
+
+```typescript
+export const tbl_tableName = pgTable("tbl_table_name", {
+  id: uuid("id")
+    .notNull()
+    .primaryKey()
+    .$default(() => sql`gen_random_uuid()`),
+    
+  // Table-specific fields
+  name: text("name").notNull(),
+  
+  // Standard fields
+  status: text("status").notNull().default("active"),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
+});
+```
+
+# Imports Organization
+- Group imports by category with blank lines between groups
+- Import related tables for relations
+- Import utility functions
+
+```typescript
+// Drizzle core imports
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  jsonb,
+  // other types...
+} from "drizzle-orm/pg-core";
+import { sql, relations } from "drizzle-orm";
+
+// Related table imports
+import { tbl_relatedTable } from "./tbl_relatedTable";
+
+// Utility imports (if any)
+import { customUtility } from "../utils/customUtility";
+```
+
+# Relations Definition
+- Define relations in a separate constant with clear naming
+- Use the plural form for many relations
+- Use the singular form for one relations
+- Include relationName for clarity
+- All relationName values must use snake_case
+
+```typescript
+export const tblTableNameRelations = relations(tbl_tableName, ({ one, many }) => ({
+  // One-to-many relations
+  relatedEntities: many(tbl_relatedTable, {
+    relationName: "table_relation_name",
+  }),
+  
+  // Many-to-one relations
+  parentEntity: one(tbl_parentTable, {
+    fields: [tbl_tableName.parent_id],
+    references: [tbl_parentTable.id],
+    relationName: "parent_relation_name",
+  }),
+}));
+```
+
+# Type Exports
+- Always export inferred types for select and insert operations
+- Use consistent naming patterns
+
+```typescript
+// Type Inference
+export type TableName = typeof tbl_tableName.$inferSelect;
+export type NewTableName = typeof tbl_tableName.$inferInsert;
+```
+
+# Documentation
+- Add comments for non-obvious fields or relations
+- Document cascade behaviors
+- Explain any special handling or constraints
+- Explain the naming convention for fields that don't follow standard patterns
+```
