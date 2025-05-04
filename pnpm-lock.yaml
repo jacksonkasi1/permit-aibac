@@ -368,6 +368,28 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
 
+  packages/groundx:
+    dependencies:
+      '@repo/logs':
+        specifier: workspace:*
+        version: link:../logs
+      axios:
+        specifier: ^1.6.2
+        version: 1.9.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.24.3
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
   packages/id:
     dependencies:
       base-x:
