@@ -1,4 +1,4 @@
-import { db, eq, type NewPost, posts } from "@repo/db";
+import { type NewPost, db, eq, posts } from "@repo/db";
 
 export const postService = {
   async createPost(post: NewPost) {

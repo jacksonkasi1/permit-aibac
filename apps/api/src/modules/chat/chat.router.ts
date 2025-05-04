@@ -1,48 +1,59 @@
 /**
- * Chat router implementation using Google AI SDK
+ * Chat router implementation using Vercel AI SDK
  */
 import { auth, getUserId, requireAuth } from "@/pkg/middleware/clerk-auth";
-import { type Message, smoothStream, streamText } from "ai";
-import { stream } from "hono/streaming";
-import { Hono } from "hono";
+import { zValidator } from "@/pkg/util/validator-wrapper";
 import { logger } from "@repo/logs";
-import { google } from "@ai-sdk/google";
+import { type Message } from "ai";
+import { Hono } from "hono";
+import { stream } from "hono/streaming";
+import { z } from "zod";
+import { chatService } from "./chat.service";
+
+// Validation schemas
+const sendChatSchema = z.object({
+  messages: z.array(
+    z.object({
+      id: z.string().optional(),
+      role: z.enum(["user", "assistant", "system", "function", "data", "tool"]),
+      content: z.string(),
+      name: z.string().optional(),
+    }),
+  ),
+  attachments: z
+    .array(
+      z.object({
+        name: z.string(),
+        url: z.string(),
+        contentType: z.string(),
+      }),
+    )
+    .optional(),
+});
+
+const historyChatSchema = z.object({
+  limit: z.number().optional().default(10),
+});
 
 /**
  * Chat routes with authentication middleware
  */
 const chatRoutes = new Hono()
   .use("*", auth(), requireAuth)
-  .post("/", async (c) => {
+  // Send a chat message and get a streaming response
+  .post("/", zValidator("json", sendChatSchema), async (c) => {
     try {
       // Parse request body
-      const { messages } = (await c.req.json()) as {
-        messages: Message[];
-      };
+      const { messages, attachments } = c.req.valid("json");
       const userId = getUserId(c);
 
-      // Initialize Google AI model
-      const gemini = google("gemini-2.5-pro-exp-03-25");
+      logger.info(`Chat request from user ${userId} with ${messages.length} messages`);
 
-      // Stream text response from model
-      const result = streamText({
-        system: "You are a helpful assistant that can answer questions and help with tasks.",
-        messages,
-        maxSteps: 10,
-        model: gemini,
-        providerOptions: {
-          google: {
-            thinkingConfig: {
-              thinkingBudget: 1024,
-            },
-          },
-        },
-        experimental_transform: smoothStream({
-          delayInMs: 20,
-        }),
-        onError: (error) => {
-          logger.error("Google AI error:", error);
-        },
+      // Process chat through service
+      const result = await chatService.processChat({
+        messages: messages as Message[],
+        userId,
+        attachments,
       });
 
       // Set appropriate headers for streaming
@@ -64,6 +75,22 @@ const chatRoutes = new Hono()
     } catch (error) {
       logger.error("Chat route error:", error);
       return c.json({ error: "Failed to process chat request" }, 500);
+    }
+  })
+  // Get chat history for the authenticated user
+  .get("/history", zValidator("query", historyChatSchema), async (c) => {
+    try {
+      const userId = getUserId(c);
+      const { limit } = c.req.valid("query");
+
+      logger.info(`Getting chat history for user ${userId}, limit: ${limit}`);
+
+      const history = await chatService.getChatHistory(userId, limit);
+
+      return c.json({ history });
+    } catch (error) {
+      logger.error("Get chat history error:", error);
+      return c.json({ error: "Failed to get chat history" }, 500);
     }
   });
 

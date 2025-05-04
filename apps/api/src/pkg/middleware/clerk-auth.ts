@@ -52,16 +52,16 @@ export const getUserId = (c: Context): string => {
 export const auth = (options?: ClerkOptions): MiddlewareHandler => {
   return async (c, next) => {
     const clerkEnv = env<ClerkEnv>(c);
-    
+
     // Get configuration from options or environment
-    const { 
-      secretKey = clerkEnv.CLERK_SECRET_KEY || "", 
-      publishableKey = clerkEnv.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "", 
-      apiUrl = clerkEnv.CLERK_API_URL, 
+    const {
+      secretKey = clerkEnv.CLERK_SECRET_KEY || "",
+      publishableKey = clerkEnv.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "",
+      apiUrl = clerkEnv.CLERK_API_URL,
       apiVersion = clerkEnv.CLERK_API_VERSION,
-      ...rest 
+      ...rest
     } = options || {};
-    
+
     // Validate required configuration
     if (!secretKey) {
       throw new Error("Missing Clerk Secret key");
@@ -77,14 +77,14 @@ export const auth = (options?: ClerkOptions): MiddlewareHandler => {
       publishableKey,
       apiUrl,
       apiVersion,
-      ...rest
+      ...rest,
     });
 
     // Authenticate the request
     const requestState = await clerkClient.authenticateRequest(c.req.raw, {
       secretKey,
       publishableKey,
-      ...rest
+      ...rest,
     });
 
     // Handle authentication headers and redirects

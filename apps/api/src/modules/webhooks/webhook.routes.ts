@@ -2,10 +2,10 @@
 
 import { Hono } from "hono";
 
-import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/backend";
 import { db, users } from "@repo/db";
 import { logger } from "@repo/logs";
+import { Webhook } from "svix";
 
 const webhookRoutes = new Hono().post("/", async (c) => {
   const SIGNING_SECRET = process.env.CLERK_SIGNING_SECRET;

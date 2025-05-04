@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
-import { auth, getAuth, getUserId, requireAuth } from "@/pkg/middleware/clerk-auth";
 import { postService } from "@/modules/posts";
+import { auth, getAuth, getUserId, requireAuth } from "@/pkg/middleware/clerk-auth";
 import { zValidator } from "@/pkg/util/validator-wrapper";
 import { postInsertSchema } from "@repo/db";
 

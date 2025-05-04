@@ -3,23 +3,28 @@ import { cors } from "hono/cors";
 
 import { postRoutes } from "@/modules/posts";
 
-import { logger } from "hono/logger";
-import { errorHandler } from "@/pkg/middleware/error";
-import { webhookRoutes } from "@/modules/webhooks/webhook.routes";
 import { chatRoutes } from "@/modules/chat/chat.router";
+import { webhookRoutes } from "@/modules/webhooks/webhook.routes";
+import { errorHandler } from "@/pkg/middleware/error";
+import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 
 const app = new Hono();
 
 app.use("*", logger());
 
+const corsOrigins = ["http://localhost:3000", "https://localhost:3000"];
+if (process.env.FRONTEND_URL) {
+  corsOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3000"],
+    origin: corsOrigins,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["Content-Length"],
+    allowHeaders: ["Content-Type", "Authorization", "X-Vercel-AI-Data-Stream"],
+    exposeHeaders: ["Content-Length", "X-Vercel-AI-Data-Stream"],
     maxAge: 600,
     credentials: true,
   }),
