@@ -8,7 +8,8 @@ import { useRouter } from "next/navigation";
 import { useLocalStorage } from "usehooks-ts";
 import { newIdWithoutPrefix } from "@repo/id";
 
-import { customFetcher, chatUrl } from "@/lib/fetcher";
+import { getChatHistory } from "@/api/chat.api";
+import { customFetcher, CHAT_API_URL } from "@/lib/fetcher";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatContainer } from "@/components/ui/chat-container";
 import { ScrollButton } from "@/components/ui/scroll-button";
@@ -71,7 +72,7 @@ export const PromptChat = forwardRef<
   } = useChat({
     initialMessages,
     id,
-    api: chatUrl,
+    api: CHAT_API_URL,
     fetch: customFetcher,
     onResponse(response) {
       if (isHomePage) {

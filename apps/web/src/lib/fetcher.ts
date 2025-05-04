@@ -1,7 +1,10 @@
 import { getToken } from "@/lib/clerk";
 
-export const chatUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/chat`;
+// API URLs
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+export const CHAT_API_URL = `${API_BASE_URL}/api/chat`;
 
+// Custom fetcher for API calls with authentication
 export async function customFetcher(input: RequestInfo | URL, init?: RequestInit) {
   const token = await getToken();
   const headers: Record<string, string> = {
