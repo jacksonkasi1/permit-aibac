@@ -37,6 +37,7 @@ export const chatService = {
             thinkingConfig: {
               thinkingBudget: 1024,
             },
+            attachments,
           },
         },
         experimental_transform: smoothStream({
