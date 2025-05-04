@@ -25,17 +25,15 @@ export const permitMiddleware = async (c: Context, next: () => Promise<void>) =>
     const action = mapMethodToAction(c.req.method);
 
     // Perform permission check using Permit.io
-    const allowed = await permit.check({
-      user: user.id,
+    const allowed = await permit.check(
+      user.id,
       action,
-      resource: resourceType,
-      context: {
-        // Include resource attributes for ABAC decisions
-        attributes: resourceAttributes,
-        // Include tenant for multi-tenant authorization
+      {
+        type: resourceType,
         tenant: user.tenant || "default",
-      },
-    });
+        attributes: resourceAttributes
+      }
+    );
 
     if (!allowed) {
       // Return standardized 403 response for unauthorized requests
