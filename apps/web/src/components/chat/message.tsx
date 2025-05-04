@@ -8,10 +8,10 @@ import equal from "fast-deep-equal";
 
 import { cn } from "@/lib/utils";
 
-import { Pencil, Sparkle } from "lucide-react";
-import { Message as PromptMessage, MessageContent } from "@/components/chat/kit/message";
-import { RenderToolInvocation } from "@/components/chat/tool-message";
+import { MessageContent, Message as PromptMessage } from "@/components/chat/kit/message";
 import { MessageReasoning } from "@/components/chat/message-reasoning";
+import { RenderToolInvocation } from "@/components/chat/tool-message";
+import { Pencil, Sparkle } from "lucide-react";
 
 const PurePreviewMessage = ({
   chatId,

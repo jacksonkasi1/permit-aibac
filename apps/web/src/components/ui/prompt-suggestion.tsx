@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { VariantProps } from "class-variance-authority"
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { VariantProps } from "class-variance-authority";
 
 export type PromptSuggestionProps = {
-  children: React.ReactNode
-  variant?: VariantProps<typeof buttonVariants>["variant"]
-  size?: VariantProps<typeof buttonVariants>["size"]
-  className?: string
-  highlight?: string
-  onClick?: (text: string) => void
-} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick">
+  children: React.ReactNode;
+  variant?: VariantProps<typeof buttonVariants>["variant"];
+  size?: VariantProps<typeof buttonVariants>["size"];
+  className?: string;
+  highlight?: string;
+  onClick?: (text: string) => void;
+} & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick">;
 
 function PromptSuggestion({
   children,
@@ -22,14 +22,14 @@ function PromptSuggestion({
   onClick,
   ...props
 }: PromptSuggestionProps) {
-  const isHighlightMode = highlight !== undefined && highlight.trim() !== ""
-  const content = typeof children === "string" ? children : ""
+  const isHighlightMode = highlight !== undefined && highlight.trim() !== "";
+  const content = typeof children === "string" ? children : "";
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (onClick && typeof children === "string") {
-      onClick(children)
+      onClick(children);
     }
-  }
+  };
 
   if (!isHighlightMode) {
     return (
@@ -42,7 +42,7 @@ function PromptSuggestion({
       >
         {children}
       </Button>
-    )
+    );
   }
 
   if (!content) {
@@ -53,20 +53,20 @@ function PromptSuggestion({
         className={cn(
           "w-full cursor-pointer justify-start rounded-xl py-2",
           "hover:bg-accent",
-          className
+          className,
         )}
         onClick={handleClick}
         {...props}
       >
         {children}
       </Button>
-    )
+    );
   }
 
-  const trimmedHighlight = highlight.trim()
-  const contentLower = content.toLowerCase()
-  const highlightLower = trimmedHighlight.toLowerCase()
-  const shouldHighlight = contentLower.includes(highlightLower)
+  const trimmedHighlight = highlight.trim();
+  const contentLower = content.toLowerCase();
+  const highlightLower = trimmedHighlight.toLowerCase();
+  const shouldHighlight = contentLower.includes(highlightLower);
 
   return (
     <Button
@@ -75,54 +75,39 @@ function PromptSuggestion({
       className={cn(
         "w-full cursor-pointer justify-start gap-0 rounded-xl py-2",
         "hover:bg-accent",
-        className
+        className,
       )}
       onClick={handleClick}
       {...props}
     >
       {shouldHighlight ? (
         (() => {
-          const index = contentLower.indexOf(highlightLower)
+          const index = contentLower.indexOf(highlightLower);
           if (index === -1)
-            return (
-              <span className="text-muted-foreground whitespace-pre-wrap">
-                {content}
-              </span>
-            )
+            return <span className="whitespace-pre-wrap text-muted-foreground">{content}</span>;
 
-          const actualHighlightedText = content.substring(
-            index,
-            index + highlightLower.length
-          )
+          const actualHighlightedText = content.substring(index, index + highlightLower.length);
 
-          const before = content.substring(0, index)
-          const after = content.substring(index + actualHighlightedText.length)
+          const before = content.substring(0, index);
+          const after = content.substring(index + actualHighlightedText.length);
 
           return (
             <>
               {before && (
-                <span className="text-muted-foreground whitespace-pre-wrap">
-                  {before}
-                </span>
+                <span className="whitespace-pre-wrap text-muted-foreground">{before}</span>
               )}
-              <span className="text-primary font-medium whitespace-pre-wrap">
+              <span className="whitespace-pre-wrap font-medium text-primary">
                 {actualHighlightedText}
               </span>
-              {after && (
-                <span className="text-muted-foreground whitespace-pre-wrap">
-                  {after}
-                </span>
-              )}
+              {after && <span className="whitespace-pre-wrap text-muted-foreground">{after}</span>}
             </>
-          )
+          );
         })()
       ) : (
-        <span className="text-muted-foreground whitespace-pre-wrap">
-          {content}
-        </span>
+        <span className="whitespace-pre-wrap text-muted-foreground">{content}</span>
       )}
     </Button>
-  )
+  );
 }
 
-export { PromptSuggestion }
+export { PromptSuggestion };

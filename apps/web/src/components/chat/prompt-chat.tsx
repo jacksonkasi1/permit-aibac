@@ -1,32 +1,32 @@
 "use client";
 
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
-import type { Attachment, Message } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useLocalStorage } from "usehooks-ts";
 import { newIdWithoutPrefix } from "@repo/id";
+import type { Attachment, Message } from "ai";
+import { useRouter } from "next/navigation";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useLocalStorage } from "usehooks-ts";
 
 import { getChatHistory } from "@/api/chat.api";
-import { customFetcher, CHAT_API_URL } from "@/lib/fetcher";
 import { ChatHeader } from "@/components/chat/chat-header";
-import { ChatContainer } from "@/components/ui/chat-container";
-import { ScrollButton } from "@/components/ui/scroll-button";
 import { ChatMessage, ThinkingMessage } from "@/components/chat/kit/chat-message";
-import { 
-  PromptInput, 
-  PromptInputTextarea, 
-  PromptInputActions, 
-  PromptInputAction 
-} from "@/components/ui/prompt-input";
-import { Button } from "@/components/ui/button";
-import { SendHorizontal, Square, Paperclip } from "lucide-react";
-import { 
-  FileUpload, 
-  FileUploadTrigger, 
-  FileUploadContent 
+import {
+  FileUpload,
+  FileUploadContent,
+  FileUploadTrigger,
 } from "@/components/chat/kit/file-upload";
+import { Button } from "@/components/ui/button";
+import { ChatContainer } from "@/components/ui/chat-container";
+import {
+  PromptInput,
+  PromptInputAction,
+  PromptInputActions,
+  PromptInputTextarea,
+} from "@/components/ui/prompt-input";
+import { ScrollButton } from "@/components/ui/scroll-button";
+import { CHAT_API_URL, customFetcher } from "@/lib/fetcher";
+import { Paperclip, SendHorizontal, Square } from "lucide-react";
 
 export type PromptChatRef = {
   setInput: (value: string) => void;
@@ -42,21 +42,15 @@ export const PromptChat = forwardRef<
     initialInput?: string;
   }
 >(function PromptChat(
-  {
-    id,
-    initialMessages = [],
-    isReadonly = false,
-    isHomePage = false,
-    initialInput = "",
-  },
-  ref
+  { id, initialMessages = [], isReadonly = false, isHomePage = false, initialInput = "" },
+  ref,
 ) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [localStorageInput, setLocalStorageInput] = useLocalStorage("input", "");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
-  
+
   const {
     messages,
     input,
@@ -93,14 +87,14 @@ export const PromptChat = forwardRef<
   }));
 
   const handleFileAdded = (files: File[]) => {
-    const newAttachments: Attachment[] = files.map(file => ({
+    const newAttachments: Attachment[] = files.map((file) => ({
       name: file.name,
       url: URL.createObjectURL(file),
       contentType: file.type,
     }));
 
-    setAttachments(prev => [...prev, ...newAttachments]);
-    toast.success(`Added ${files.length} file${files.length > 1 ? 's' : ''}`);
+    setAttachments((prev) => [...prev, ...newAttachments]);
+    toast.success(`Added ${files.length} file${files.length > 1 ? "s" : ""}`);
   };
 
   useEffect(() => {
@@ -124,33 +118,37 @@ export const PromptChat = forwardRef<
   const isInputDisabled = status !== "ready" || isReadonly;
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex h-full w-full flex-col">
       {/* Chat Header for non-home pages */}
       {!isHomePage && <ChatHeader chatId={id} />}
-      
+
       {/* Chat Messages Area */}
-      <div className="flex-1 w-full overflow-y-auto">
-        {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            isLoading={status === "submitted" && message.id === messages[messages.length - 1]?.id}
-          />
-        ))}
-        
-        {status === "submitted" &&
-          messages.length > 0 &&
-          messages[messages.length - 1]?.role === "user" && <ThinkingMessage />}
+      <div className="w-full flex-1 overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-2xl flex-col space-y-4 px-4 py-4">
+          {messages.length === 0 && (
+            <div className="mt-8 flex h-full flex-col items-center justify-center text-center">
+              <p className="text-muted-foreground">No messages yet. Start a conversation!</p>
+            </div>
+          )}
+
+          {messages.map((message) => (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              isLoading={status === "submitted" && message.id === messages[messages.length - 1]?.id}
+            />
+          ))}
+
+          {status === "submitted" &&
+            messages.length > 0 &&
+            messages[messages.length - 1]?.role === "user" && <ThinkingMessage />}
+        </div>
       </div>
 
       {/* Chat Input Area */}
       {!isReadonly && (
         <div className="mx-auto w-full max-w-3xl px-4 pt-2">
-          <FileUpload
-            onFilesAdded={handleFileAdded}
-            multiple={true}
-            disabled={isInputDisabled}
-          >
+          <FileUpload onFilesAdded={handleFileAdded} multiple={true} disabled={isInputDisabled}>
             <PromptInput
               isLoading={isGeneratingResponse}
               value={input}
@@ -162,27 +160,22 @@ export const PromptChat = forwardRef<
                 <div className="flex items-center">
                   <PromptInputAction tooltip="Attach files">
                     <FileUploadTrigger asChild>
-                      <Button 
-                        type="button"
-                        size="icon"
-                        variant="ghost" 
-                        disabled={isInputDisabled}
-                      >
+                      <Button type="button" size="icon" variant="ghost" disabled={isInputDisabled}>
                         <Paperclip className="h-4 w-4" />
                       </Button>
                     </FileUploadTrigger>
                   </PromptInputAction>
                 </div>
-                
-                <PromptInputTextarea 
-                  placeholder="Send a message..." 
+
+                <PromptInputTextarea
+                  placeholder="Send a message..."
                   className="min-h-[60px]"
                   disabled={isInputDisabled}
                 />
-                
+
                 <PromptInputActions>
                   {isGeneratingResponse ? (
-                    <Button 
+                    <Button
                       size="icon"
                       variant="ghost"
                       onClick={() => {
@@ -199,8 +192,8 @@ export const PromptChat = forwardRef<
                       <Square className="h-4 w-4" />
                     </Button>
                   ) : (
-                    <Button 
-                      size="icon" 
+                    <Button
+                      size="icon"
                       disabled={input.trim().length === 0 || isInputDisabled}
                       onClick={handleSubmit}
                     >
@@ -211,21 +204,24 @@ export const PromptChat = forwardRef<
               </div>
             </PromptInput>
             <FileUploadContent>
-              <div className="flex h-64 w-80 flex-col items-center justify-center rounded-lg border border-dashed border-primary">
+              <div className="flex h-64 w-80 flex-col items-center justify-center rounded-lg border border-primary border-dashed">
                 <div className="text-center">
-                  <p className="text-sm font-medium">Drop your files here</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-medium text-sm">Drop your files here</p>
+                  <p className="text-muted-foreground text-xs">
                     Files will be uploaded when you drop them
                   </p>
                 </div>
               </div>
             </FileUploadContent>
           </FileUpload>
-          
+
           {attachments.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {attachments.map((attachment, index) => (
-                <div key={index} className="flex items-center gap-1 rounded-md bg-accent p-1 text-xs">
+                <div
+                  key={index}
+                  className="flex items-center gap-1 rounded-md bg-accent p-1 text-xs"
+                >
                   <span className="max-w-[150px] truncate">{attachment.name}</span>
                   <Button
                     size="icon"
@@ -258,4 +254,4 @@ export const PromptChat = forwardRef<
       )}
     </div>
   );
-}); 
+});

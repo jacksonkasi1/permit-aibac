@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { Attachment, Message } from "ai";
 import { useChat } from "@ai-sdk/react";
+import type { Attachment, Message } from "ai";
+import { useEffect, useState } from "react";
 
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-import { MultimodalInput } from "./multi-modal-input";
-import { customFetcher, chatUrl } from "@/lib/fetcher";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { Messages } from "@/components/chat/messages";
-import { useLocalStorage } from "usehooks-ts";
+import { chatUrl, customFetcher } from "@/lib/fetcher";
 import { newIdWithoutPrefix } from "@repo/id";
+import { useLocalStorage } from "usehooks-ts";
+import { MultimodalInput } from "./multi-modal-input";
 
 export function Chat({
   id,

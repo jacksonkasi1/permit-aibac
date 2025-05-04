@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Copy } from "lucide-react";
-import { useCopyToClipboard } from "usehooks-ts";
 import { useState } from "react";
+import { useCopyToClipboard } from "usehooks-ts";
 
 interface CopyButtonProps extends React.ComponentProps<typeof Button> {}
 

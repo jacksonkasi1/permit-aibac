@@ -1,10 +1,10 @@
-import { memo, useState, useRef } from "react";
 import { type ChatRequestOptions, type Message } from "ai";
 import equal from "fast-deep-equal";
+import { memo, useRef, useState } from "react";
 
-import { PreviewMessage, ThinkingMessage } from "./message";
-import { ChatContainer } from "./kit/chat-container";
 import { UseChatHelpers } from "@ai-sdk/react";
+import { ChatContainer } from "./kit/chat-container";
+import { PreviewMessage, ThinkingMessage } from "./message";
 
 interface MessagesProps {
   chatId: string;

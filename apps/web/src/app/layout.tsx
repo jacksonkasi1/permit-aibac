@@ -1,4 +1,3 @@
-import type { Metadata, Viewport } from "next";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { VercelAnalytics } from "@/lib/analytics/vercel";
@@ -6,6 +5,7 @@ import { geistMono, geistSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/providers/providers";
 import { ClerkProvider } from "@clerk/nextjs";
+import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
 

@@ -1,22 +1,22 @@
 "use client";
 
-import type React from "react";
-import { memo, useCallback, useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import type { Attachment, ChatRequestOptions, CreateMessage, Message } from "ai";
 import equal from "fast-deep-equal";
+import type React from "react";
+import { type Dispatch, type SetStateAction, memo, useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 import { sanitizeUIMessages } from "@/components/chat/util";
-import { ArrowUp, Paperclip, Square, StopCircleIcon } from "lucide-react";
 import { useOnMountUnsafe } from "@/hooks/use-on-mount-unsafe";
+import { ArrowUp, Paperclip, Square, StopCircleIcon } from "lucide-react";
 
-import { useQuery } from "@tanstack/react-query";
 import { UseChatHelpers } from "@ai-sdk/react";
+import { useQuery } from "@tanstack/react-query";
 
 function PureMultimodalInput({
   chatId,

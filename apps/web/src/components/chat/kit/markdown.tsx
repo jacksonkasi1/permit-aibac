@@ -4,8 +4,8 @@ import { memo, useId, useMemo } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "./code-block";
 import { CopyButton } from "@/components/copy-button";
+import { CodeBlock, CodeBlockCode, CodeBlockGroup } from "./code-block";
 
 export type MarkdownProps = {
   children: string;

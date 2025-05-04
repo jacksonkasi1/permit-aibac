@@ -47,20 +47,20 @@ export async function sendChatMessage({
 }: ChatRequestParams): Promise<ChatResponse> {
   try {
     const client = await getApiClient();
-    
+
     // Check if the chat endpoint exists
     if (!client.chat) {
       throw new Error("Chat API endpoint not available");
     }
-    
+
     const response = await client.chat.$post({
       json: { messages, attachments },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to send chat message: ${response.statusText}`);
     }
-    
+
     return response.json() as Promise<ChatResponse>;
   } catch (error) {
     console.error("Error sending chat message:", error);
@@ -75,22 +75,22 @@ export async function sendChatMessage({
 export async function getChatHistory(limit = 10): Promise<ChatHistoryResponse> {
   try {
     const client = await getApiClient();
-    
+
     // Check if the chat endpoint exists
     if (!client.chat) {
       throw new Error("Chat API endpoint not available");
     }
-    
+
     // Since the API structure may vary, we're using any temporarily
     // This should be properly typed in production code
     const response = await (client.chat as any).history.$get({
       query: { limit },
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get chat history: ${response.statusText}`);
     }
-    
+
     return response.json() as Promise<ChatHistoryResponse>;
   } catch (error) {
     console.error("Error fetching chat history:", error);
@@ -103,7 +103,7 @@ export async function getChatHistory(limit = 10): Promise<ChatHistoryResponse> {
  * This helps when working with useChat hook and the API
  */
 export function convertToCoreMessages(uiMessages: UIMessage[]): Message[] {
-  return uiMessages.map(msg => ({
+  return uiMessages.map((msg) => ({
     id: msg.id,
     role: msg.role,
     content: msg.content,
@@ -118,4 +118,4 @@ export type SendChatMessageParams = {
 
 export type GetChatHistoryParams = {
   limit?: number;
-}; 
+};
