@@ -392,7 +392,7 @@ export const { POST } = serve(async (context) => {
     }
   },
   "env": {
-    "GOOGLE_AI_API_KEY": "@GOOGLE_AI_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY": "@GOOGLE_GENERATIVE_AI_API_KEY",
     "PERMIT_API_KEY": "@permit_api_key",
     "GROUNDX_API_KEY": "@groundx_api_key",
     "GROUNDX_BUCKET_ID": "@groundx_bucket_id",

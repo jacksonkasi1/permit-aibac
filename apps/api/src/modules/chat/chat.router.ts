@@ -68,6 +68,7 @@ const chatRoutes = new Hono()
             result.toDataStream({
               sendReasoning: true,
               getErrorMessage(error) {
+                console.log("Stream error", error);
                 logger.error(`Stream error for user ${userId}:`, error);
                 return "An error occurred while processing your request";
               },

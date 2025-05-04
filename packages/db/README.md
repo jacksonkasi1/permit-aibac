@@ -79,7 +79,7 @@ To deploy to Vercel:
    - `GROUNDX_API_KEY`
    - `QSTASH_URL`
    - `QSTASH_TOKEN`
-   - `GOOGLE_AI_API_KEY`
+   - `GOOGLE_GENERATIVE_AI_API_KEY`
 
 4. Deploy the application
 
