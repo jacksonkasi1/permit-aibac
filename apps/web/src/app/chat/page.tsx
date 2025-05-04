@@ -43,7 +43,7 @@ export default function ChatPage() {
   };
   
   return (
-    <div className="flex h-[calc(100dvh-49px)] w-full flex-col">
+    <div className="flex h-[100vh] w-full flex-col">
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <div className="px-4 py-6 text-center">
@@ -78,7 +78,7 @@ export default function ChatPage() {
         {/* Toggle button and suggestions */}
         <div className="border-t">
           <div className="mx-auto w-full max-w-3xl">
-            <div className="flex justify-center py-2 border-b">
+            <div className="flex justify-center py-2">
               <Button 
                 variant="ghost" 
                 size="sm" 

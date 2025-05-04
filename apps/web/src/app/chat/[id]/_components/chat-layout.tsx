@@ -71,7 +71,7 @@ export function ChatLayout({ id }: ChatLayoutProps) {
       {/* Toggle button and suggestions */}
       <div className="border-t">
         <div className="mx-auto w-full max-w-3xl">
-          <div className="flex justify-center py-2 border-b">
+          <div className="flex justify-center py-2">
             <Button 
               variant="ghost" 
               size="sm" 
