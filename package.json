@@ -15,11 +15,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "ts-node": "^10.9.2",
     "turbo": "^2.5.0",
     "typescript": "^5"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=22"
+  },
+  "dependencies": {
+    "permitio": "^2.7.4"
   }
 }
