@@ -23,6 +23,15 @@ export async function classifyPrompt(
     // Get user attributes for context
     const userAttrs = await getUserAttributes(userId);
     
+    // Admin users bypass classification restrictions
+    if (userAttrs.role === 'admin') {
+      return {
+        allowed: true,
+        classification,
+        filters: {} // Admins don't need filters
+      };
+    }
+    
     // Check if this classification of prompt is allowed for this user
     const allowed = await permit.check(
       userId, 
@@ -141,7 +150,16 @@ export async function authorizeRagQuery(
   filters?: Record<string, any>;
 }> {
   try {
-    // Use the correct permit.check() format based on the latest permit.io API
+    // First check if user is an admin (they should always have access)
+    const userAttrs = await getUserAttributes(userId);
+    if (userAttrs.role === 'admin') {
+      return { 
+        allowed: true,
+        filters: {} // Admin can see everything
+      };
+    }
+
+    // For non-admins, use the regular permit check
     const canSearch = await permit.check(
       userId, 
       "search", 
@@ -152,9 +170,6 @@ export async function authorizeRagQuery(
     if (!canSearch) {
       return { allowed: false };
     }
-
-    // Get user attributes for filtering
-    const userAttrs = await getUserAttributes(userId);
 
     // Create permission filters based on user attributes
     const filters = createPermissionFilters(userAttrs);
