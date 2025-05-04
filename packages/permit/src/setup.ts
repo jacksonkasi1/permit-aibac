@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { Permit } from "permitio";
 import { ResourceConfig, RoleConfig } from "./types";
+import { db, eq, tbl_roles } from "@repo/db";
 
 // Load environment variables
 config();
@@ -206,10 +207,15 @@ async function setup() {
     // Create resource relations for ReBAC
     await createResourceRelations();
 
+    // Ensure database roles are in sync with Permit.io
+    await syncDatabaseRoles();
+
     console.log("Permit.io setup completed successfully");
   } catch (error) {
     console.error("Permit.io setup failed:", error);
-    process.exit(1);
+    if (typeof process !== 'undefined') {
+      process.exit(1);
+    }
   }
 }
 
@@ -320,5 +326,58 @@ async function createResourceRelations() {
   }
 }
 
-// Execute setup
-setup();
+/**
+ * Synchronize roles from Permit.io to the database
+ */
+async function syncDatabaseRoles() {
+  console.log("Syncing roles to database...");
+  
+  try {
+    // For each role in our configuration
+    for (const role of roles) {
+      // Check if role exists in database
+      const existingRoles = await db
+        .select()
+        .from(tbl_roles)
+        .where(eq(tbl_roles.key, role.key));
+
+      const roleExists = existingRoles.length > 0;
+      
+      if (!roleExists) {
+        // Create the role in the database
+        await db.insert(tbl_roles).values({
+          key: role.key,
+          name: role.name,
+        });
+        console.log(`Created role in database: ${role.key}`);
+      } else {
+        // Update the existing role in the database
+        await db
+          .update(tbl_roles)
+          .set({
+            name: role.name,
+          })
+          .where(eq(tbl_roles.key, role.key));
+        console.log(`Updated role in database: ${role.key}`);
+      }
+    }
+    
+    console.log("Database role sync completed");
+  } catch (error) {
+    console.error("Error syncing roles to database:", error);
+    throw error;
+  }
+}
+
+// Export setup function
+export { setup };
+
+// If this file is run directly, execute setup
+if (typeof require !== 'undefined' && require.main === module) {
+  setup().catch((error) => {
+    console.error("Setup failed:", error);
+    if (typeof process !== 'undefined') {
+      process.exit(1);
+    }
+  });
+}

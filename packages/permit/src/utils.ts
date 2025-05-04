@@ -13,12 +13,13 @@ export async function authorizeRagQuery(
   filters?: Record<string, any>;
 }> {
   try {
-    // Use the correct permit.check() format
-    const canSearch = await permit.check({
-      user: userId,
-      action: "search",
-      resource: resourceType,
-    });
+    // Use the correct permit.check() format based on the latest permit.io API
+    const canSearch = await permit.check(
+      userId, 
+      "search", 
+      resourceType, 
+      { context: { query } }
+    );
 
     if (!canSearch) {
       return { allowed: false };

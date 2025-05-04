@@ -4,13 +4,20 @@
   "description": "Permit.io authorization configuration and utilities",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "keywords": ["authorization", "permit", "rbac", "abac", "rebac"],
+  "keywords": [
+    "authorization",
+    "permit",
+    "rbac",
+    "abac",
+    "rebac"
+  ],
   "scripts": {
     "setup": "bun run src/setup.ts",
     "lint": "biome lint ./src",
     "format": "biome format --write ."
   },
   "devDependencies": {
+    "@repo/db": "workspace:*",
     "@biomejs/biome": "1.9.4",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
