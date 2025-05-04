@@ -7,21 +7,29 @@
     "keywords": [
         "rag",
         "groundx",
-        "eyelevel"
+        "eyelevel",
+        "semantic-search",
+        "vector-search",
+        "document-retrieval"
     ],
     "scripts": {
         "test": "vitest run -c ./vitest.config.ts",
         "format": "biome format --write .",
-        "setup": "bun src/setup.ts"
+        "setup": "bun src/setup.ts",
+        "lint": "biome check --unsafe src"
     },
     "devDependencies": {
         "@repo/typescript-config": "workspace:*",
         "@types/node": "^22.15.3",
-        "typescript": "^5.8.3"
+        "typescript": "^5.8.3",
+        "vitest": "^1.2.1"
     },
     "dependencies": {
         "@repo/logs": "workspace:*",
         "axios": "^1.6.2",
+        "form-data": "^4.0.0",
+        "groundx": "^2.2.3",
+        "mime-types": "^2.1.35",
         "zod": "^3.22.4"
     }
 }

@@ -1,19 +1,14 @@
-import axios, { AxiosInstance } from "axios";
-import { GroundXEnv } from "./types";
 import { logger } from "@repo/logs";
-
-/**
- * Default GroundX API URL
- */
-const DEFAULT_BASE_URL = "https://api.groundx.ai/api/v1";
+import { GroundXClient as GroundXSDK } from "groundx";
+import { GroundXEnv } from "./types";
 
 /**
  * GroundX API Client class for managing connections to the GroundX API
  */
 export class GroundXClient {
   private apiKey: string;
-  private baseURL: string;
-  private client: AxiosInstance;
+  private baseURL?: string;
+  private client: GroundXSDK;
   public defaultBucketId?: number;
 
   /**
@@ -21,45 +16,32 @@ export class GroundXClient {
    */
   constructor(config: GroundXEnv) {
     this.apiKey = config.apiKey;
-    this.baseURL = config.baseURL || DEFAULT_BASE_URL;
+    this.baseURL = config.baseURL;
     this.defaultBucketId = config.defaultBucketId;
 
     if (!this.apiKey) {
       throw new Error("GroundX API key is required");
     }
 
-    // Initialize axios client
-    this.client = axios.create({
-      baseURL: this.baseURL,
-      headers: {
-        "X-API-Key": this.apiKey,
-        "Content-Type": "application/json",
-      },
+    // Initialize the official GroundX client with the API key
+    this.client = new GroundXSDK({
+      apiKey: this.apiKey,
+      environment: this.baseURL,
     });
 
-    // Add response interceptor for error handling
-    this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response) {
-          logger.error({
-            status: error.response.status,
-            data: error.response.data,
-            url: error.config.url,
-            method: error.config.method,
-          }, "GroundX API error");
-        } else {
-          logger.error({ error: error.message }, "GroundX network error");
-        }
-        return Promise.reject(error);
-      }
+    logger.info(
+      {
+        baseURL: this.baseURL || "default GroundX API URL",
+        defaultBucketId: this.defaultBucketId,
+      },
+      "GroundX client initialized",
     );
   }
 
   /**
-   * Get the axios client instance for direct API access
+   * Get the GroundX client instance for direct API access
    */
-  getClient(): AxiosInstance {
+  getClient(): GroundXSDK {
     return this.client;
   }
 }
@@ -86,4 +68,4 @@ export function getGroundXClient(): GroundXClient {
     throw new Error("GroundX client has not been initialized. Call initGroundXClient first.");
   }
   return groundXClient;
-} 
+}

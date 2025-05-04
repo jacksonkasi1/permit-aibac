@@ -4,7 +4,8 @@ A utility package for integrating with EyeLevel GroundX RAG (Retrieval-Augmented
 
 ## Features
 
-- Document uploading and management
+- Document uploading and management (local and remote)
+- Website crawling for content ingestion
 - Bucket creation and administration
 - High-accuracy semantic search
 - TypeScript/Node.js support with full type definitions
@@ -42,10 +43,13 @@ initGroundXClient({
 });
 ```
 
-### Setup Default Bucket
+### Verify API Key and Setup
 
 ```typescript
-import { setupGroundX } from '@repo/groundx';
+import { verifyApiKey, setupGroundX } from '@repo/groundx';
+
+// Verify the API key is valid
+await verifyApiKey(process.env.GROUNDX_API_KEY!);
 
 // Set up default bucket
 const bucketId = await setupGroundX({
@@ -56,6 +60,8 @@ const bucketId = await setupGroundX({
 ```
 
 ### Upload Documents
+
+#### Local Files
 
 ```typescript
 import { uploadFile, uploadDocument } from '@repo/groundx';
@@ -74,10 +80,52 @@ const documentData = await uploadDocument({
     bucketId: bucketId,
     fileName: 'patient-record.json',
     fileType: 'json',
+    processLevel: 'full', // 'full', 'basic', or 'none'
     searchData: {
       patientId: '12345',
       department: 'cardiology'
     }
+  }
+});
+```
+
+#### Remote Documents
+
+```typescript
+import { uploadRemoteDocument } from '@repo/groundx';
+
+// Upload a document from a URL
+const remoteDoc = await uploadRemoteDocument(
+  'https://example.com/path/to/document.pdf',
+  bucketId,
+  'remote-document.pdf',
+  'pdf',
+  { category: 'medical', department: 'oncology' }
+);
+```
+
+### Crawl Websites
+
+```typescript
+import { crawlWebsite, crawl } from '@repo/groundx';
+
+// Simple website crawl
+const crawledDocs = await crawl(
+  'https://example.com/medical-info',
+  bucketId,
+  2, // depth
+  10 // max pages to crawl
+);
+
+// Advanced website crawl
+const advancedCrawl = await crawlWebsite({
+  bucketId: bucketId,
+  sourceUrl: 'https://example.com/medical-info',
+  depth: 3,
+  cap: 20,
+  searchData: {
+    category: 'medical-resource',
+    department: 'cardiology'
   }
 });
 ```
@@ -110,7 +158,8 @@ import {
   createBucket, 
   getBucket, 
   listBuckets,
-  deleteBucket 
+  deleteBucket,
+  getOrCreateBucket
 } from '@repo/groundx';
 
 // Create a new bucket
@@ -118,6 +167,9 @@ const newBucket = await createBucket({
   name: 'radiology-data',
   description: 'Radiology reports and images'
 });
+
+// Get or create a bucket
+const bucket = await getOrCreateBucket('oncology-data', 'Oncology reports and research papers');
 
 // List all buckets
 const buckets = await listBuckets();
@@ -153,7 +205,12 @@ bun run setup
 
 ## Error Handling
 
-All functions include proper error handling and logging via the `@repo/logs` package.
+All functions include proper error handling and logging via the `@repo/logs` package. The library will throw detailed errors when API calls fail, including:
+
+- Authentication errors (invalid API key)
+- Network errors
+- API-specific errors
+- Data validation errors
 
 ## GroundX Features
 
