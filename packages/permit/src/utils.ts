@@ -2,6 +2,134 @@ import { permit } from "./index";
 import { ResourceAttributes, UserAttributes } from "./types";
 
 /**
+ * Classify and authorize a prompt to determine if it should be allowed
+ * Based on the example from: https://www.permit.io/blog/ai-prompt-classification-for-access-control
+ */
+export async function classifyPrompt(
+  userId: string,
+  prompt: string
+): Promise<{
+  allowed: boolean;
+  reason?: string;
+  classification?: string;
+  filters?: Record<string, any>;
+}> {
+  try {
+    // Simple classification of prompt intent
+    // In production, this would use a more sophisticated classification model
+    const classification = await classifyPromptIntent(prompt);
+    console.log(`Prompt classified as: ${classification}`);
+
+    // Get user attributes for context
+    const userAttrs = await getUserAttributes(userId);
+    
+    // Check if this classification of prompt is allowed for this user
+    const allowed = await permit.check(
+      userId, 
+      classification, 
+      "aiPrompt",
+      { context: { prompt, classification } }
+    );
+
+    if (!allowed) {
+      return { 
+        allowed: false, 
+        classification,
+        reason: `User not authorized for ${classification} operations` 
+      };
+    }
+
+    // Check for banned patterns/keywords (simple implementation)
+    const bannedPatterns = getBannedPatterns(userAttrs.role);
+    if (containsBannedPatterns(prompt, bannedPatterns)) {
+      return { 
+        allowed: false, 
+        classification,
+        reason: "Prompt contains prohibited content"
+      };
+    }
+
+    // Create filters for vector DB or AI response based on user attributes
+    const filters = createPermissionFilters(userAttrs);
+
+    return {
+      allowed: true,
+      classification,
+      filters
+    };
+  } catch (error) {
+    console.error("Error classifying prompt:", error);
+    return { 
+      allowed: false,
+      reason: "Error during prompt classification" 
+    };
+  }
+}
+
+/**
+ * Classify a prompt's intent into an action type
+ * This is a simplified implementation - in production use a proper ML model
+ */
+async function classifyPromptIntent(prompt: string): Promise<string> {
+  const lowerPrompt = prompt.toLowerCase();
+  
+  // Simple pattern matching for demonstration
+  if (lowerPrompt.includes("update") || 
+      lowerPrompt.includes("modify") || 
+      lowerPrompt.includes("change")) {
+    return "update";
+  }
+  
+  if (lowerPrompt.includes("delete") || 
+      lowerPrompt.includes("remove") || 
+      lowerPrompt.includes("erase")) {
+    return "delete";
+  }
+  
+  if (lowerPrompt.includes("create") || 
+      lowerPrompt.includes("add") || 
+      lowerPrompt.includes("new")) {
+    return "create";
+  }
+  
+  // Default to 'view' as the safest operation
+  return "view";
+}
+
+/**
+ * Get banned patterns based on user role
+ */
+function getBannedPatterns(role: string = "patient"): RegExp[] {
+  const commonBannedPatterns = [
+    /show me all patient(s)? data/i,
+    /bypass (security|authentication|authorization)/i,
+    /ignore (policy|restrictions|permissions)/i,
+    /admin access/i,
+    /\.exec\(|\.eval\(/i, // Code injection patterns
+  ];
+
+  // Add role-specific banned patterns
+  if (role === "patient") {
+    return [
+      ...commonBannedPatterns,
+      /other patients/i,
+      /all (medical|health) records/i,
+      /doctor('s)? notes/i,
+      /system (admin|administrator|configuration)/i,
+    ];
+  }
+
+  return commonBannedPatterns;
+}
+
+/**
+ * Check if a prompt contains banned patterns
+ */
+function containsBannedPatterns(prompt: string, patterns: RegExp[]): boolean {
+  return patterns.some(pattern => pattern.test(prompt));
+}
+
+/**
  * Authorize a RAG (Retrieval Augmented Generation) query based on user permissions
  */
 export async function authorizeRagQuery(
