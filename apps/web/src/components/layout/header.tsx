@@ -29,25 +29,32 @@ export function Header() {
               <span className="font-bold text-xl">HealthGuard AI</span>
             </Link>
           </div>
+          
+          {/* Navigation - different for signed in vs signed out users */}
           <nav className="hidden space-x-4 md:flex">
-            <Link
-              href="/dashboard"
-              className="font-medium text-muted-foreground text-sm hover:text-primary"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/records"
-              className="font-medium text-muted-foreground text-sm hover:text-primary"
-            >
-              Medical Records
-            </Link>
-            <Link
-              href="/appointments"
-              className="font-medium text-muted-foreground text-sm hover:text-primary"
-            >
-              Appointments
-            </Link>
+            <SignedIn>
+              {/* Only show these links when signed in */}
+              <Link
+                href="/dashboard"
+                className="font-medium text-muted-foreground text-sm hover:text-primary"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/records"
+                className="font-medium text-muted-foreground text-sm hover:text-primary"
+              >
+                Medical Records
+              </Link>
+              <Link
+                href="/appointments"
+                className="font-medium text-muted-foreground text-sm hover:text-primary"
+              >
+                Appointments
+              </Link>
+            </SignedIn>
+            
+            {/* Always show AI Assistant link */}
             <Link
               href="/chat"
               className="font-medium text-muted-foreground text-sm hover:text-primary"
@@ -55,6 +62,7 @@ export function Header() {
               AI Assistant
             </Link>
           </nav>
+          
           <div className="hidden items-center space-x-4 md:flex">
             <Link
               href="/security"
@@ -123,30 +131,36 @@ export function Header() {
           </div>
 
           <nav className="flex flex-col space-y-4">
-            <Link
-              href="/dashboard"
-              className="font-medium text-base text-muted-foreground hover:text-primary"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/records"
-              className="font-medium text-base text-muted-foreground hover:text-primary"
-            >
-              Medical Records
-            </Link>
-            <Link
-              href="/appointments"
-              className="font-medium text-base text-muted-foreground hover:text-primary"
-            >
-              Appointments
-            </Link>
+            <SignedIn>
+              {/* Only show these links when signed in */}
+              <Link
+                href="/dashboard"
+                className="font-medium text-base text-muted-foreground hover:text-primary"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/records"
+                className="font-medium text-base text-muted-foreground hover:text-primary"
+              >
+                Medical Records
+              </Link>
+              <Link
+                href="/appointments"
+                className="font-medium text-base text-muted-foreground hover:text-primary"
+              >
+                Appointments
+              </Link>
+            </SignedIn>
+            
+            {/* Always show AI Assistant link */}
             <Link
               href="/chat"
               className="font-medium text-base text-muted-foreground hover:text-primary"
             >
               AI Assistant
             </Link>
+            
             <Link
               href="/security"
               className="flex items-center space-x-2 font-medium text-base text-muted-foreground hover:text-primary"
