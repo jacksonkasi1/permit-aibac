@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,6 +54,7 @@ export function Header() {
             </Link>
           </nav>
           <div className="hidden items-center space-x-4 md:flex">
+            <ThemeToggle />
             <SignedIn>
               <UserButton />
             </SignedIn>

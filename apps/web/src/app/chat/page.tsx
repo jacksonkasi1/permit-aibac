@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChatContainer } from "@/components/ui/chat-container";
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
 import { ScrollButton } from "@/components/ui/scroll-button";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { newIdWithoutPrefix } from "@repo/id";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -46,7 +47,10 @@ export default function ChatPage() {
     <div className="flex h-[100vh] w-full flex-col">
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-6 text-center">
+        <div className="relative px-4 py-6 text-center">
+          <div className="absolute right-4 top-4">
+            <ThemeToggle />
+          </div>
           <h1 className="font-bold text-4xl">Healthcare Assistant</h1>
           <p className="mt-2 text-lg text-muted-foreground">Your AI guide to health and wellness</p>
         </div>
