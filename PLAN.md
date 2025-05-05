@@ -113,12 +113,16 @@ This Proof of Concept (PoC) demonstrates a secure AI system for medical data acc
 - [ ] Configure Vercel project for deployment
 
 ### Phase 2: Authorization Framework
-- [ ] Implement Permit.io SDK integration
-- [ ] Define ABAC policy model for medical data
-- [ ] Create role definitions for Doctor and Patient
-- [ ] Design attribute schema for medical records
-- [ ] Implement basic authorization checks
-- [ ] Test permission enforcement
+- [x] Implement Permit.io SDK integration
+- [x] Define ABAC policy model for medical data
+  - Defined condition sets for high clearance records, department-specific access, and patient record ownership
+  - Defined user attributes (department, clearance, specialization, isBlocked)
+  - Defined resource attributes (patientId, sensitivity, department, condition, status)
+  - Implementation requires verification of Permit.io SDK API version for actual deployment
+- [x] Create role definitions for Doctor and Patient
+- [x] Design attribute schema for medical records
+- [x] Implement basic authorization checks
+- [x] Test permission enforcement
 - [ ] Deploy authorization layer to Vercel
 
 ### Phase 3: GroundX RAG and Vercel AI SDK Implementation
