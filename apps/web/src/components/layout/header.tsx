@@ -4,7 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { Menu, X } from "lucide-react";
+import { Heart, Menu, Shield, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -23,37 +23,46 @@ export function Header() {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <Image
-                src="https://placehold.co/40x40"
-                alt="Logo"
-                width={40}
-                height={40}
-                className="h-8 w-auto"
-              />
-              <span className="font-bold text-xl">Logo</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
+                <Heart className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="font-bold text-xl">HealthGuard AI</span>
             </Link>
           </div>
           <nav className="hidden space-x-4 md:flex">
             <Link
-              href="/about"
+              href="/dashboard"
               className="font-medium text-muted-foreground text-sm hover:text-primary"
             >
-              About
+              Dashboard
             </Link>
             <Link
-              href="/services"
+              href="/records"
               className="font-medium text-muted-foreground text-sm hover:text-primary"
             >
-              Services
+              Medical Records
             </Link>
             <Link
-              href="/contact"
+              href="/appointments"
               className="font-medium text-muted-foreground text-sm hover:text-primary"
             >
-              Contact
+              Appointments
+            </Link>
+            <Link
+              href="/chat"
+              className="font-medium text-muted-foreground text-sm hover:text-primary"
+            >
+              AI Assistant
             </Link>
           </nav>
           <div className="hidden items-center space-x-4 md:flex">
+            <Link
+              href="/security"
+              className="flex items-center space-x-1 text-sm font-medium text-muted-foreground hover:text-primary"
+            >
+              <Shield className="h-4 w-4" />
+              <span>Security</span>
+            </Link>
             <ThemeToggle />
             <SignedIn>
               <UserButton />
@@ -105,7 +114,7 @@ export function Header() {
                 Sign up
               </Link>
               <Link
-                href="/login"
+                href="/signin"
                 className={buttonVariants({ variant: "ghost", size: "sm", className: "w-full" })}
               >
                 Log in
@@ -115,23 +124,39 @@ export function Header() {
 
           <nav className="flex flex-col space-y-4">
             <Link
-              href="/about"
+              href="/dashboard"
               className="font-medium text-base text-muted-foreground hover:text-primary"
             >
-              About
+              Dashboard
             </Link>
             <Link
-              href="/services"
+              href="/records"
               className="font-medium text-base text-muted-foreground hover:text-primary"
             >
-              Services
+              Medical Records
             </Link>
             <Link
-              href="/contact"
+              href="/appointments"
               className="font-medium text-base text-muted-foreground hover:text-primary"
             >
-              Contact
+              Appointments
             </Link>
+            <Link
+              href="/chat"
+              className="font-medium text-base text-muted-foreground hover:text-primary"
+            >
+              AI Assistant
+            </Link>
+            <Link
+              href="/security"
+              className="flex items-center space-x-2 font-medium text-base text-muted-foreground hover:text-primary"
+            >
+              <Shield className="h-4 w-4" />
+              <span>Security</span>
+            </Link>
+            <div className="pt-2">
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </div>
