@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <footer className="border-t bg-background py-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Logo and description */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center space-x-2">
@@ -21,34 +21,7 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Links column 1 */}
-          <div>
-            <h3 className="mb-3 font-medium">Resources</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/dashboard" className="text-muted-foreground hover:text-primary">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/records" className="text-muted-foreground hover:text-primary">
-                  Medical Records
-                </Link>
-              </li>
-              <li>
-                <Link href="/appointments" className="text-muted-foreground hover:text-primary">
-                  Appointments
-                </Link>
-              </li>
-              <li>
-                <Link href="/chat" className="text-muted-foreground hover:text-primary">
-                  AI Assistant
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Links column 2 */}
+          {/* Security column */}
           <div>
             <h3 className="mb-3 font-medium">Security</h3>
             <ul className="space-y-2 text-sm">
@@ -78,7 +51,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Links column 3 */}
+          {/* Powered By column */}
           <div>
             <h3 className="mb-3 font-medium">Powered By</h3>
             <ul className="space-y-2 text-sm">
