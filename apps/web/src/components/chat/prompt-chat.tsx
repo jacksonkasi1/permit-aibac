@@ -77,7 +77,7 @@ export const PromptChat = forwardRef<
       attachments,
     },
     onError: (err) => {
-      toast.error("An error occurred while sending your message.");
+      // Error is already handled by customFetcher with toast notifications
       console.error(err);
     },
   });
